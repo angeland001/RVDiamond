@@ -1,0 +1,50 @@
+/* ──────────────────────────────────────────────────────────────
+   Design Tokens — Woody's Mobile RV Tech
+   Vintage Americana / industrial mechanic theme.
+   Keep this file 1:1 portable to a future React/Tailwind theme.
+   ────────────────────────────────────────────────────────────── */
+:root {
+  /* Palette */
+  --cream:        #f1e7d1;
+  --cream-2:      #e8dcc0;
+  --paper:        #faf3e2;
+  --ink:          #1f1610;
+  --ink-2:        #382a1f;
+  --ink-soft:     #5a4634;
+  --rust:         #b14a1f;
+  --rust-deep:    #8a3614;
+  --rust-glow:    #d96a35;
+  --accent:       var(--rust);
+  --accent-deep:  var(--rust-deep);
+  --accent-glow:  var(--rust-glow);
+  --pine:         #2f5037;
+  --mustard:      #c98a16;
+  --rule:         #b08a5b;
+  --rule-soft:    rgba(31, 22, 16, .15);
+
+  /* Type */
+  --font-display: "Alfa Slab One", "Roboto Slab", Georgia, serif;
+  --font-body:    "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  /* Radius / shape */
+  --radius-sm:    2px;
+  --radius-md:    4px;
+  --radius-lg:    8px;
+
+  /* Focus */
+  --focus-ring:   3px solid var(--rust-glow);
+  --focus-offset: 2px;
+
+  /* Motion */
+  --ease-out:     cubic-bezier(.22, 1, .36, 1);
+  --ease-in:      cubic-bezier(.55, 0, 1, .45);
+  --ease-spring:  cubic-bezier(.34, 1.56, .64, 1);
+  --t-fast:       150ms;
+  --t-med:        260ms;
+  --t-slow:       420ms;
+
+  /* Layout */
+  --container:    1180px;
+  --nav-h:        64px;
+}

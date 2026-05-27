@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Placeholder start frame: parked RV at the start of a service call">
+  <defs>
+    <linearGradient id="sky-start" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#382a1f"/>
+      <stop offset="1" stop-color="#1f1610"/>
+    </linearGradient>
+    <linearGradient id="ground-start" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#3a2a1c"/>
+      <stop offset="1" stop-color="#1f1610"/>
+    </linearGradient>
+    <pattern id="dots-start" width="6" height="6" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r=".7" fill="rgba(241,231,209,.05)"/>
+    </pattern>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1600" height="900" fill="url(#sky-start)"/>
+  <rect width="1600" height="900" fill="url(#dots-start)"/>
+
+  <!-- Distant tree line -->
+  <path d="M0 620 L120 580 L240 600 L360 560 L480 595 L600 565 L720 600 L840 570 L960 600 L1080 575 L1200 605 L1320 575 L1440 600 L1600 580 L1600 720 L0 720 Z"
+        fill="rgba(47,80,55,.45)"/>
+
+  <!-- Ground -->
+  <rect y="700" width="1600" height="200" fill="url(#ground-start)"/>
+
+  <!-- Lonely RV silhouette, small in the distance -->
+  <g transform="translate(720,580) scale(.9)" opacity=".88">
+    <rect x="0" y="0" width="180" height="70" rx="6" fill="#5a4634" stroke="#1f1610" stroke-width="2"/>
+    <rect x="170" y="20" width="50" height="50" rx="4" fill="#5a4634" stroke="#1f1610" stroke-width="2"/>
+    <rect x="14" y="20" width="32" height="22" fill="#1f1610"/>
+    <rect x="58" y="20" width="42" height="22" fill="#1f1610"/>
+    <rect x="112" y="20" width="38" height="22" fill="#1f1610"/>
+    <circle cx="40" cy="76" r="10" fill="#1f1610"/>
+    <circle cx="160" cy="76" r="10" fill="#1f1610"/>
+    <circle cx="200" cy="76" r="10" fill="#1f1610"/>
+  </g>
+
+  <!-- Single rust-glow lamp from above (calls hero attention) -->
+  <radialGradient id="lamp-start" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="rgba(217,106,53,.30)"/>
+    <stop offset="1" stop-color="rgba(217,106,53,0)"/>
+  </radialGradient>
+  <circle cx="800" cy="450" r="380" fill="url(#lamp-start)"/>
+
+  <!-- Eyebrow text -->
+  <g font-family="JetBrains Mono, monospace" fill="rgba(217,106,53,.7)" font-size="22" letter-spacing="6">
+    <text x="800" y="160" text-anchor="middle">BEFORE  ·  CALL RECEIVED</text>
+  </g>
+</svg>
