@@ -1,6 +1,10 @@
 # Claude Code local config (may contain API keys)
 .claude/
 
+# Environment / API keys
+.env
+frontend/assets/js/maps-config.js
+
 # OS
 .DS_Store
 Thumbs.db

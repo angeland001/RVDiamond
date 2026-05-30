@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1f1610" />
 
   <title>Coverage — Woody's Mobile RV Tech | Beebe, AR</title>
-  <meta name="description" content="On-site RV repair within an hour of Beebe, Arkansas — Searcy, Cabot, Ward, Austin, Jacksonville, North Little Rock, Conway, Greenbrier, Heber Springs, Benton, Bryant." />
+  <meta name="description" content="On-site RV repair based in Beebe, Arkansas — Cabot, Little Rock, Searcy, Vilonia, Ward, Lonoke, Jacksonville, North Little Rock." />
   <link rel="canonical" href="https://woodysrv.com/coverage" />
 
   <meta property="og:type" content="website" />
@@ -89,64 +89,31 @@
           </div>
           <ul class="area-towns reveal" aria-label="Towns served">
             <li class="home-town">Beebe · HQ</li>
-            <li>Austin</li>
-            <li>Benton</li>
-            <li>Bryant</li>
             <li>Cabot</li>
-            <li>Conway</li>
-            <li>Greenbrier</li>
-            <li>Heber Springs</li>
             <li>Jacksonville</li>
+            <li>Little Rock</li>
+            <li>Lonoke</li>
             <li>N. Little Rock</li>
             <li>Searcy</li>
+            <li>Vilonia</li>
             <li>Ward</li>
           </ul>
           <p class="area-note">→ Outside the circle? Call anyway — travel fee may apply.</p>
         </div>
 
-        <div class="area-map reveal" role="img" aria-label="Service area map showing Beebe, AR and surrounding towns within a 60-mile radius">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                <path d="M10 0H0V10" fill="none" stroke="rgba(241,231,209,0.06)" stroke-width="0.3"/>
-              </pattern>
-              <radialGradient id="reach" cx="50%" cy="50%" r="50%">
-                <stop offset="0%"   stop-color="rgba(217,106,53,0.30)"/>
-                <stop offset="60%"  stop-color="rgba(217,106,53,0.12)"/>
-                <stop offset="100%" stop-color="rgba(217,106,53,0)"/>
-              </radialGradient>
-            </defs>
-            <rect width="100" height="100" fill="url(#grid)"/>
-            <path d="M0 70 Q 30 60 50 50 T 100 35" stroke="rgba(241,231,209,0.18)" stroke-width="0.4" fill="none" stroke-dasharray="2 2"/>
-            <path d="M50 0 L50 100" stroke="rgba(241,231,209,0.12)" stroke-width="0.3" fill="none"/>
-            <path d="M0 50 L100 50"  stroke="rgba(241,231,209,0.12)" stroke-width="0.3" fill="none"/>
-            <circle cx="50" cy="50" r="42" fill="url(#reach)"/>
-            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(217,106,53,0.55)" stroke-width="0.4" stroke-dasharray="1.5 1.5"/>
-            <g><circle cx="50" cy="50" r="1.6" fill="#d96a35"/><circle cx="50" cy="50" r="3.2" fill="none" stroke="#d96a35" stroke-width="0.4" opacity="0.6"/><text class="pin-label home-label" x="52.2" y="51" style="font-size:2.4px">BEEBE</text></g>
-            <g><circle cx="66" cy="38" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="68.2" y="39" style="font-size:2.1px">SEARCY</text></g>
-            <g><circle cx="38" cy="60" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="40.2" y="61" style="font-size:2.1px">CABOT</text></g>
-            <g><circle cx="42" cy="56" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="44.2" y="57" style="font-size:2.1px">WARD</text></g>
-            <g><circle cx="40" cy="58" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="42.2" y="59" style="font-size:2.1px">AUSTIN</text></g>
-            <g><circle cx="32" cy="67" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="34.2" y="68" style="font-size:2.1px">JACKSONVILLE</text></g>
-            <g><circle cx="26" cy="76" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="28.2" y="77" style="font-size:2.1px">N. LITTLE ROCK</text></g>
-            <g><circle cx="18" cy="60" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="20.2" y="61" style="font-size:2.1px">CONWAY</text></g>
-            <g><circle cx="14" cy="50" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="16.2" y="51" style="font-size:2.1px">GREENBRIER</text></g>
-            <g><circle cx="70" cy="22" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="72.2" y="23" style="font-size:2.1px">HEBER SPRINGS</text></g>
-            <g><circle cx="22" cy="86" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="24.2" y="87" style="font-size:2.1px">BENTON</text></g>
-            <g><circle cx="28" cy="84" r="0.9" fill="#f1e7d1"/><text class="pin-label" x="30.2" y="85" style="font-size:2.1px">BRYANT</text></g>
-            <g transform="translate(92,8)">
-              <circle r="3.5" fill="none" stroke="rgba(241,231,209,0.4)" stroke-width="0.3"/>
-              <path d="M0 -3 L0.8 0 L0 3 L-0.8 0z" fill="#d96a35"/>
-              <text y="-4.5" text-anchor="middle" style="font-size:2px;fill:#f1e7d1;font-family:monospace">N</text>
-            </g>
-          </svg>
+        <div class="area-map reveal" role="region" aria-label="Interactive service area map — click any town to see drive time from Beebe">
+          <div id="coverage-map"></div>
+          <div id="map-hint" class="map-hint" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z"/><circle cx="12" cy="9" r="2.5" fill="currentColor" stroke="none"/></svg>
+            Click any town to see drive time
+          </div>
         </div>
       </div>
     </section>
 
     <section class="cta-strip" aria-labelledby="cta-heading">
       <h2 id="cta-heading">On the map? Let's set up a call.</h2>
-      <p class="cta-sub">Mon–Sat · 7 am – 7 pm · After-hours by appointment</p>
+      <p class="cta-sub">Mon–Fri · 9 am – 5 pm</p>
       <a class="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
         (501) 555-0199
@@ -177,9 +144,7 @@
       <div>
         <h3>Hours</h3>
         <div class="footer-rows">
-          <p>Mon – Sat · 7:00 am – 7:00 pm</p>
-          <p>Sun · By appointment</p>
-          <p>After-hours emergency · Call/text first</p>
+          <p>Mon – Fri · 9:00 am – 5:00 pm</p>
         </div>
       </div>
     </div>
@@ -203,5 +168,7 @@
   <script src="./assets/js/loader.js" defer></script>
   <script src="./assets/js/nav.js" defer></script>
   <script src="./assets/js/transitions.js" defer></script>
+  <script src="./assets/js/maps-config.js"></script>
+  <script src="./assets/js/coverage-map.js"></script>
 </body>
 </html>

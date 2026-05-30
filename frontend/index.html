@@ -52,8 +52,7 @@
     "address": { "@type": "PostalAddress", "addressLocality": "Beebe", "addressRegion": "AR", "addressCountry": "US" },
     "geo": { "@type": "GeoCoordinates", "latitude": 35.0709, "longitude": -91.8826 },
     "openingHoursSpecification": [
-      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "07:00", "closes": "19:00" },
-      { "@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "description": "By appointment" }
+      { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "17:00" }
     ],
     "areaServed": ["Beebe, AR","Searcy, AR","Cabot, AR","Ward, AR","Austin, AR","Jacksonville, AR","North Little Rock, AR","Conway, AR","Greenbrier, AR","Heber Springs, AR","Benton, AR","Bryant, AR"],
     "knowsAbout": ["HVAC repair","RV plumbing","RV electrical systems","RV winterizing","Pre-purchase RV inspection","RVTI certification","EPA 608"]
@@ -135,15 +134,45 @@
   <!-- ════════════════════════ MAIN CONTENT ════════════════════════ -->
   <main id="main-content" role="main">
 
+    <!-- ──────────── SCROLL ANIMATION ──────────── -->
+    <section class="scroll-anim" aria-label="From call received to fixed on site">
+      <div class="scroll-anim-runway">
+        <div class="scroll-anim-sticky">
+          <canvas id="scroll-canvas" aria-hidden="true"></canvas>
+          <div class="scroll-canvas-loader" id="scroll-canvas-loader" role="status" aria-live="polite">
+            <div class="scroll-canvas-loader-track">
+              <div class="scroll-canvas-loader-bar" id="scroll-canvas-loader-bar"></div>
+            </div>
+          </div>
+          <div class="scroll-anim-overlay" aria-hidden="true"></div>
+
+          <div class="scroll-anim-stage">
+            <span class="scroll-anim-eyebrow">Woody's Mobile RV Tech · Beebe, AR</span>
+            <h1 class="scroll-anim-title display">
+              RV down? <span class="accent">I fix it on-site.</span>
+            </h1>
+            <p class="scroll-anim-sub">
+              One call. Same tech. Same day. No tow.
+            </p>
+          </div>
+
+          <span class="scroll-anim-hint" aria-hidden="true">
+            Keep scrolling
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </span>
+        </div>
+      </div>
+    </section>
+
     <!-- ──────────── HERO ──────────── -->
     <section class="hero" aria-label="Introduction">
       <div class="hero-inner">
         <div class="hero-copy">
           <span class="eyebrow">Beebe, Arkansas · Mobile Service</span>
-          <h1 class="hero-headline display">
+          <h2 class="hero-headline display">
             Your rig <span class="underline-mark">won't fix itself.</span><br>
             <span class="accent-text">I come to you.</span>
-          </h1>
+          </h2>
           <p class="hero-sub">
             Hi, I'm Woody. RV-certified mobile technician based in Beebe, working
             on-site at homes, campgrounds, storage lots and roadside breakdowns
@@ -172,40 +201,6 @@
             <span class="stamp-tiny">No tow</span>
             <span class="stamp-big">FIXED</span>
             <span class="stamp-tiny">on site</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ──────────── SCROLL ANIMATION ──────────── -->
-    <!-- 21st.dev "ContainerScroll" pattern in vanilla. Swap <img.frame-img--end>
-         for a <video data-scrub muted playsinline> once the real video lands. -->
-    <section class="scroll-anim" aria-label="From call received to fixed on site">
-      <div class="scroll-anim-runway">
-        <div class="scroll-anim-sticky">
-          <div class="scroll-anim-stage">
-            <span class="scroll-anim-eyebrow">Scroll · See the call</span>
-            <h2 class="scroll-anim-title display">
-              From breakdown <span class="accent">to back on the road.</span>
-            </h2>
-            <p class="scroll-anim-sub">
-              Same truck, same tech, same day. Watch the call play out.
-            </p>
-
-            <div class="scroll-anim-frame" aria-hidden="true">
-              <img class="frame-img frame-img--start" src="./assets/images/hero-start.svg" alt="" />
-              <img class="frame-img frame-img--end"   src="./assets/images/hero-end.svg"   alt="" />
-              <!-- When the video is ready, replace the end img with:
-                   <video class="frame-img frame-img--end" data-scrub muted playsinline preload="auto">
-                     <source src="./assets/images/job.mp4" type="video/mp4" />
-                   </video>
-              -->
-            </div>
-
-            <span class="scroll-anim-hint" aria-hidden="true">
-              Keep scrolling
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-            </span>
           </div>
         </div>
       </div>
@@ -241,7 +236,7 @@
     <!-- ──────────── CTA STRIP ──────────── -->
     <section class="cta-strip" aria-labelledby="cta-heading">
       <h2 id="cta-heading">Rig acting up? Let's get it handled.</h2>
-      <p class="cta-sub">Mon–Sat · 7 am – 7 pm · After-hours by appointment</p>
+      <p class="cta-sub">Mon–Fri · 9 am – 5 pm</p>
       <a class="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
         (501) 555-0199
@@ -273,9 +268,7 @@
       <div>
         <h3>Hours</h3>
         <div class="footer-rows">
-          <p>Mon – Sat · 7:00 am – 7:00 pm</p>
-          <p>Sun · By appointment</p>
-          <p>After-hours emergency · Call/text first</p>
+          <p>Mon – Fri · 9:00 am – 5:00 pm</p>
         </div>
       </div>
     </div>
@@ -297,6 +290,7 @@
     </a>
   </nav>
 
+  <script src="./assets/js/hero-canvas.js" defer></script>
   <script src="./assets/js/loader.js" defer></script>
   <script src="./assets/js/nav.js" defer></script>
   <script src="./assets/js/scroll-animation.js" defer></script>

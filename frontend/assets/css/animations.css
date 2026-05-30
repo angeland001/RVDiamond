@@ -148,6 +148,51 @@
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 
+/* ════════════════════════ SCROLL CANVAS (inside scroll-anim-frame) ════════════════════════ */
+/* Canvas fills the existing scroll-anim-frame container; CSS clip-path/scale
+   animation on the parent drives the reveal — canvas just renders frames. */
+
+.canvas-loading { overflow: hidden; }
+
+#scroll-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Loading bar: sits over canvas until all frames are preloaded */
+.scroll-canvas-loader {
+  position: absolute;
+  inset: 0;
+  background: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: opacity 0.35s var(--ease-out);
+}
+.scroll-canvas-loader[data-state="done"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.scroll-canvas-loader-track {
+  width: 120px;
+  height: 2px;
+  background: rgba(241, 231, 209, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.scroll-canvas-loader-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-glow);
+  border-radius: 1px;
+  transition: width 0.15s ease;
+}
+
 /* ════════════════════════ SCROLL ANIMATION ════════════════════════ */
 /* Mimics 21st.dev ContainerScroll + sticky video pattern in vanilla CSS/JS.
    - Outer container is ~300vh tall (the scroll runway).
@@ -174,14 +219,23 @@
   width: 100%;
   display: grid;
   place-items: center;
-  background:
-    radial-gradient(60% 50% at 50% 20%, rgba(217, 106, 53, .14) 0%, transparent 70%),
-    var(--ink);
+  background: var(--ink);
   color: var(--cream);
   overflow: hidden;
 }
+.scroll-anim-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(60% 50% at 50% 20%, rgba(217, 106, 53, .12) 0%, transparent 70%),
+    rgba(31, 22, 16, calc(0.22 + var(--p, 0) * 0.32));
+  pointer-events: none;
+}
+
 .scroll-anim-stage {
   position: relative;
+  z-index: 2;
   width: 100%;
   max-width: 1200px;
   padding: 0 16px;
@@ -206,9 +260,7 @@
   line-height: 1;
   margin: 0;
   color: var(--cream);
-  /* Slight vertical drift driven by scroll progress */
   transform: translateY(calc((1 - var(--p, 0)) * 24px));
-  opacity: calc(.4 + var(--p, 0) * .6);
 }
 .scroll-anim-title .accent { color: var(--accent-glow); }
 .scroll-anim-sub {
@@ -218,11 +270,10 @@
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--cream-2);
-  opacity: calc(.5 + var(--p, 0) * .5);
   max-width: 60ch;
 }
 
-/* The frame: at p=0 small/rounded/inset, at p=1 fills the stage. */
+/* The frame: always fully visible — canvas frame sequence IS the animation. */
 .scroll-anim-frame {
   position: relative;
   width: 100%;
@@ -230,29 +281,9 @@
   aspect-ratio: 16 / 9;
   background: var(--ink-2);
   border: 1px solid rgba(241, 231, 209, .15);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  /* Inset shrinks from ~40% to 0; corners go from very round to 12px. */
-  clip-path: inset(
-    calc((1 - var(--p, 0)) * 35%) calc((1 - var(--p, 0)) * 35%)
-    round calc(12px + (1 - var(--p, 0)) * 600px)
-  );
-  transform: scale(calc(.78 + var(--p, 0) * .22));
-  transform-origin: center center;
-  transition: transform .04s linear;
-  will-change: transform, clip-path;
 }
-.scroll-anim-frame .frame-img,
-.scroll-anim-frame video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-/* Start frame fades out as p increases, end frame fades in */
-.scroll-anim-frame .frame-img--start { opacity: calc(1 - var(--p, 0)); }
-.scroll-anim-frame .frame-img--end   { opacity: var(--p, 0); }
 
 /* Hint chevron, fades out as you scroll into the animation */
 .scroll-anim-hint {
@@ -260,6 +291,7 @@
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: .22em;
@@ -282,12 +314,6 @@
 @media (prefers-reduced-motion: reduce) {
   .scroll-anim-runway { height: auto; }
   .scroll-anim-sticky { position: static; height: auto; padding: 56px 16px; min-height: 60vh; }
-  .scroll-anim-frame {
-    clip-path: inset(0 round 12px);
-    transform: none;
-  }
-  .scroll-anim-frame .frame-img--start { opacity: 0; }
-  .scroll-anim-frame .frame-img--end   { opacity: 1; }
   .scroll-anim-hint svg { animation: none; }
   .scroll-anim-hint { display: none; }
 }
