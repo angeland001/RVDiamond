@@ -1,0 +1,319 @@
+/* ──────────────────────────────────────────────────────────────
+   Animations — Page loader, page transitions, scroll animation
+   Respects prefers-reduced-motion throughout.
+   ────────────────────────────────────────────────────────────── */
+
+/* ════════════════════════ PAGE LOADER ════════════════════════ */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--paper);
+  background-image:
+    radial-gradient(rgba(31, 22, 16, .06) 1px, transparent 1px),
+    radial-gradient(rgba(31, 22, 16, .04) 1px, transparent 1px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+  display: grid;
+  place-items: center;
+  transition: opacity var(--t-med) var(--ease-out), visibility var(--t-med);
+}
+.page-loader[data-state="ready"] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loader-stage {
+  display: grid;
+  gap: 18px;
+  place-items: center;
+  text-align: center;
+}
+
+/* Gear assembly: two interlocking gears + a piston/spark */
+.loader-gears {
+  position: relative;
+  width: 124px;
+  height: 124px;
+}
+.loader-gear {
+  position: absolute;
+  width: 84px; height: 84px;
+  animation: gear-spin 2.4s linear infinite;
+  transform-origin: 50% 50%;
+}
+.loader-gear--big {
+  top: 0; left: 0;
+  color: var(--ink);
+}
+.loader-gear--small {
+  bottom: 0; right: 0;
+  width: 54px; height: 54px;
+  color: var(--accent);
+  animation-name: gear-spin-rev;
+  animation-duration: 1.5s;
+}
+.loader-gear svg { width: 100%; height: 100%; display: block; }
+
+@keyframes gear-spin     { to { transform: rotate(360deg); } }
+@keyframes gear-spin-rev { to { transform: rotate(-360deg); } }
+
+.loader-wordmark {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: .01em;
+  color: var(--ink);
+  line-height: 1;
+}
+.loader-wordmark .accent { color: var(--accent); }
+.loader-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+/* Animated dashed progress bar */
+.loader-progress {
+  width: 180px;
+  height: 4px;
+  background: var(--rule-soft);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+.loader-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--accent) 40%, var(--accent-glow) 60%, transparent);
+  transform: translateX(-100%);
+  animation: loader-progress-slide 1.6s var(--ease-out) infinite;
+}
+@keyframes loader-progress-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-gear { animation: none; }
+  .loader-progress::after { animation: none; transform: translateX(0); background: var(--accent); }
+}
+
+/* ════════════════════════ PAGE TRANSITIONS ════════════════════════ */
+/* Fade + lift on initial mount */
+.page-enter {
+  animation: page-enter var(--t-slow) var(--ease-out) both;
+}
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* View Transitions API (Chromium browsers) — paper crossfade */
+@view-transition { navigation: auto; }
+::view-transition-old(root) {
+  animation: page-out var(--t-med) var(--ease-in) both;
+}
+::view-transition-new(root) {
+  animation: page-in var(--t-slow) var(--ease-out) both;
+}
+@keyframes page-out {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter { animation: none; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+}
+
+/* Reveal-on-scroll utility (used by IntersectionObserver in transitions.js) */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity var(--t-slow) var(--ease-out), transform var(--t-slow) var(--ease-out);
+  will-change: opacity, transform;
+}
+.reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ════════════════════════ SCROLL CANVAS (inside scroll-anim-frame) ════════════════════════ */
+/* Canvas fills the existing scroll-anim-frame container; CSS clip-path/scale
+   animation on the parent drives the reveal — canvas just renders frames. */
+
+.canvas-loading { overflow: hidden; }
+
+#scroll-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Loading bar: sits over canvas until all frames are preloaded */
+.scroll-canvas-loader {
+  position: absolute;
+  inset: 0;
+  background: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: opacity 0.35s var(--ease-out);
+}
+.scroll-canvas-loader[data-state="done"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.scroll-canvas-loader-track {
+  width: 120px;
+  height: 2px;
+  background: rgba(241, 231, 209, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.scroll-canvas-loader-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-glow);
+  border-radius: 1px;
+  transition: width 0.15s ease;
+}
+
+/* ════════════════════════ SCROLL ANIMATION ════════════════════════ */
+/* Mimics 21st.dev ContainerScroll + sticky video pattern in vanilla CSS/JS.
+   - Outer container is ~300vh tall (the scroll runway).
+   - Inner is sticky, fills the viewport.
+   - Frame box uses clip-path inset + scale, both driven by scroll progress
+     via a CSS custom property (--p, 0 → 1) set in JS.
+   - At p=0  → frame is small, rounded, slightly inset (start frame).
+   - At p=1  → frame fills the stage with sharp corners (end frame).
+*/
+.scroll-anim {
+  position: relative;
+  width: 100%;
+}
+.scroll-anim-runway {
+  /* The scroll runway. Adjust height to control scrub length. */
+  height: 300vh;
+  position: relative;
+}
+.scroll-anim-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--cream);
+  overflow: hidden;
+}
+.scroll-anim-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(60% 50% at 50% 20%, rgba(217, 106, 53, .12) 0%, transparent 70%),
+    rgba(31, 22, 16, calc(0.22 + var(--p, 0) * 0.32));
+  pointer-events: none;
+}
+
+.scroll-anim-stage {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 16px;
+  display: grid;
+  gap: 18px;
+  place-items: center;
+  text-align: center;
+}
+
+.scroll-anim-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent-glow);
+  opacity: calc(1 - var(--p, 0) * .5);
+  transition: opacity .1s linear;
+}
+.scroll-anim-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 7vw, 72px);
+  line-height: 1;
+  margin: 0;
+  color: var(--cream);
+  transform: translateY(calc((1 - var(--p, 0)) * 24px));
+}
+.scroll-anim-title .accent { color: var(--accent-glow); }
+.scroll-anim-sub {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cream-2);
+  max-width: 60ch;
+}
+
+/* The frame: always fully visible — canvas frame sequence IS the animation. */
+.scroll-anim-frame {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  aspect-ratio: 16 / 9;
+  background: var(--ink-2);
+  border: 1px solid rgba(241, 231, 209, .15);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* Hint chevron, fades out as you scroll into the animation */
+.scroll-anim-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--cream-2);
+  opacity: calc(1 - var(--p, 0) * 2);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.scroll-anim-hint svg {
+  width: 14px; height: 14px;
+  animation: chevron-bob 1.6s var(--ease-out) infinite;
+}
+@keyframes chevron-bob {
+  0%, 100% { transform: translateY(0); opacity: .7; }
+  50%      { transform: translateY(4px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-anim-runway { height: auto; }
+  .scroll-anim-sticky { position: static; height: auto; padding: 56px 16px; min-height: 60vh; }
+  .scroll-anim-hint svg { animation: none; }
+  .scroll-anim-hint { display: none; }
+}
