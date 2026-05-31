@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Placeholder end frame: Woody working on the rig at the job site">
+  <defs>
+    <linearGradient id="sky-end" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#b14a1f"/>
+      <stop offset=".6" stop-color="#8a3614"/>
+      <stop offset="1" stop-color="#382a1f"/>
+    </linearGradient>
+    <linearGradient id="ground-end" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#5a4634"/>
+      <stop offset="1" stop-color="#1f1610"/>
+    </linearGradient>
+    <pattern id="dots-end" width="5" height="5" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r=".7" fill="rgba(241,231,209,.06)"/>
+    </pattern>
+  </defs>
+
+  <!-- Sunset sky -->
+  <rect width="1600" height="900" fill="url(#sky-end)"/>
+  <rect width="1600" height="900" fill="url(#dots-end)"/>
+
+  <!-- Sun disk -->
+  <circle cx="1280" cy="280" r="90" fill="#f1e7d1" opacity=".92"/>
+  <circle cx="1280" cy="280" r="160" fill="rgba(241,231,209,.18)"/>
+
+  <!-- Distant tree line -->
+  <path d="M0 600 L120 560 L240 580 L360 540 L480 575 L600 545 L720 580 L840 550 L960 580 L1080 555 L1200 585 L1320 555 L1440 580 L1600 560 L1600 720 L0 720 Z"
+        fill="rgba(31,22,16,.55)"/>
+
+  <!-- Ground / driveway -->
+  <rect y="680" width="1600" height="220" fill="url(#ground-end)"/>
+  <path d="M0 760 L1600 760" stroke="rgba(241,231,209,.18)" stroke-width="2" stroke-dasharray="20 14"/>
+
+  <!-- RV close up, hood open, technician (Woody) at work -->
+  <g transform="translate(360,440)">
+    <!-- Body -->
+    <rect x="0" y="0" width="700" height="220" rx="14" fill="#f1e7d1" stroke="#1f1610" stroke-width="6"/>
+    <!-- Cab -->
+    <rect x="660" y="60" width="160" height="160" rx="10" fill="#e8dcc0" stroke="#1f1610" stroke-width="6"/>
+    <!-- Windows -->
+    <rect x="24" y="22" width="160" height="64" fill="#1f1610"/>
+    <rect x="200" y="22" width="160" height="64" fill="#1f1610"/>
+    <rect x="376" y="22" width="160" height="64" fill="#1f1610"/>
+    <rect x="552" y="22" width="92" height="64" fill="#1f1610"/>
+    <rect x="676" y="76" width="60" height="48" fill="#1f1610"/>
+    <!-- Door -->
+    <rect x="430" y="100" width="90" height="120" fill="#382a1f" stroke="#1f1610" stroke-width="4"/>
+    <circle cx="510" cy="160" r="4" fill="#d96a35"/>
+    <!-- Side panel + stripe -->
+    <rect x="0" y="120" width="640" height="14" fill="#b14a1f"/>
+    <!-- Wheels -->
+    <circle cx="100" cy="230" r="34" fill="#1f1610"/>
+    <circle cx="100" cy="230" r="14" fill="#5a4634"/>
+    <circle cx="560" cy="230" r="34" fill="#1f1610"/>
+    <circle cx="560" cy="230" r="14" fill="#5a4634"/>
+    <circle cx="760" cy="230" r="34" fill="#1f1610"/>
+    <circle cx="760" cy="230" r="14" fill="#5a4634"/>
+
+    <!-- Open service hatch (HVAC roof unit popped) -->
+    <rect x="240" y="-46" width="120" height="48" rx="4" fill="#d96a35" stroke="#1f1610" stroke-width="4"/>
+    <line x1="260" y1="-30" x2="340" y2="-30" stroke="#1f1610" stroke-width="3"/>
+    <line x1="260" y1="-16" x2="340" y2="-16" stroke="#1f1610" stroke-width="3"/>
+
+    <!-- Technician (Woody) -->
+    <g transform="translate(820,40)">
+      <!-- Toolbox at his feet -->
+      <rect x="-10" y="160" width="64" height="36" rx="3" fill="#b14a1f" stroke="#1f1610" stroke-width="3"/>
+      <rect x="6" y="152" width="32" height="10" rx="2" fill="#5a4634" stroke="#1f1610" stroke-width="3"/>
+      <!-- Body -->
+      <rect x="14" y="80" width="40" height="80" fill="#2f5037" stroke="#1f1610" stroke-width="3"/>
+      <!-- Head -->
+      <circle cx="34" cy="60" r="18" fill="#f1e7d1" stroke="#1f1610" stroke-width="3"/>
+      <!-- Cap -->
+      <path d="M14 56 Q34 36 54 56 L60 64 L8 64 Z" fill="#b14a1f" stroke="#1f1610" stroke-width="3"/>
+      <!-- Arm reaching to RV -->
+      <line x1="20" y1="100" x2="-40" y2="60" stroke="#2f5037" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="-40" cy="60" r="8" fill="#f1e7d1" stroke="#1f1610" stroke-width="3"/>
+      <!-- Wrench in hand -->
+      <line x1="-44" y1="56" x2="-72" y2="36" stroke="#5a4634" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="-72" cy="36" r="6" fill="none" stroke="#5a4634" stroke-width="4"/>
+    </g>
+
+    <!-- Sparks from the repair -->
+    <g fill="#d96a35">
+      <circle cx="290" cy="-58" r="3"/>
+      <circle cx="310" cy="-66" r="2"/>
+      <circle cx="330" cy="-50" r="2.5"/>
+      <circle cx="276" cy="-72" r="2"/>
+    </g>
+  </g>
+
+  <!-- Stamp -->
+  <g transform="translate(140,200) rotate(-8)">
+    <circle r="78" fill="#b14a1f" stroke="#f1e7d1" stroke-width="3" stroke-dasharray="4 4"/>
+    <g text-anchor="middle" fill="#f1e7d1" font-family="Alfa Slab One, serif">
+      <text y="-18" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="3">NO TOW</text>
+      <text y="10" font-size="26">FIXED</text>
+      <text y="34" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="3">ON SITE</text>
+    </g>
+  </g>
+
+  <!-- Eyebrow text -->
+  <g font-family="JetBrains Mono, monospace" fill="rgba(241,231,209,.85)" font-size="22" letter-spacing="6">
+    <text x="800" y="160" text-anchor="middle">AFTER  ·  ON THE TRUCK, ONE VISIT</text>
+  </g>
+</svg>
