@@ -7,7 +7,7 @@ export default function Footer() {
     <footer className="site-footer" role="contentinfo">
       <div className="footer-inner">
         <div>
-          <h3>Woody's Mobile RV Tech</h3>
+          <h3>Diamond RV Solutions</h3>
           <div className="footer-rows">
             <a href="tel:+15015550199">(501) 555-0199 · call or text</a>
             <a href="mailto:woody@woodysrv.example">woody@woodysrv.example</a>
@@ -31,7 +31,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-fineprint">
-        <span>© {year} Woody's Mobile RV Tech · Beebe, AR</span>
+        <span>© {year} Diamond RV Solutions · Beebe, AR</span>
         <span>Independent · Not affiliated with any dealer or manufacturer</span>
       </div>
     </footer>

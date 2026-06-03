@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import SplitText from '../components/SplitText';
+import GlareHover from '../components/GlareHover';
+import ClickSpark from '../components/ClickSpark';
 
 const TOTAL_FRAMES = 121;
 const BATCH_SIZE   = 20;
@@ -26,7 +29,7 @@ export default function Home() {
   const loaderBarRef = useRef(null);
 
   useEffect(() => {
-    document.title = "Woody's Mobile RV Tech — On-Site RV Repair | Beebe, AR";
+    document.title = "Diamond RV Solutions — On-Site RV Repair | Beebe, AR";
   }, []);
 
   // Canvas frame-sequence scroll animation
@@ -230,11 +233,17 @@ export default function Home() {
             <div className="scroll-anim-overlay" aria-hidden="true" />
 
             <div className="scroll-anim-stage">
-              <span className="scroll-anim-eyebrow">Woody's Mobile RV Tech · Beebe, AR</span>
-              <h1 className="scroll-anim-title display">
-                RV down? <span className="accent">I fix it on-site.</span>
+              <span className="scroll-anim-eyebrow">Diamond RV Solutions · Beebe, AR</span>
+              <h1 className="scroll-anim-title display" aria-label="RV down? I fix it on-site.">
+                <SplitText text="RV down?" delay={75} duration={0.8} startIndex={0} />
+                {' '}
+                <span className="accent" aria-hidden="true">
+                  <SplitText text="I fix it on-site." delay={75} duration={0.8} startIndex={7} />
+                </span>
               </h1>
-              <p className="scroll-anim-sub">One call. Same tech. Same day. No tow.</p>
+              <p className="scroll-anim-sub" aria-label="One call. Same tech. Same day. No tow.">
+                <SplitText text="One call. Same tech. Same day. No tow." delay={75} duration={0.8} />
+              </p>
             </div>
 
             <span className="scroll-anim-hint" aria-hidden="true">
@@ -268,23 +277,37 @@ export default function Home() {
               <li><CheckIcon />All brands</li>
             </ul>
             <div className="hero-cta-row">
-              <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody for a quote">
-                <PhoneIcon />Call for a quote
-              </a>
-              <Link className="btn btn-ghost" to="/services">See services</Link>
+              <ClickSpark sparkColor="#f1e7d1" sparkCount={8} sparkRadius={22} sparkSize={7} duration={420}>
+                <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody for a quote">
+                  <PhoneIcon />Call for a quote
+                </a>
+              </ClickSpark>
+              <ClickSpark sparkColor="#d96a35" sparkCount={6} sparkRadius={18} sparkSize={6} duration={380}>
+                <Link className="btn btn-ghost" to="/services">See services</Link>
+              </ClickSpark>
             </div>
           </div>
 
-          <div className="hero-photo" role="img" aria-label="Woody at work on an RV">
-            <div className="hero-photo-placeholder" aria-hidden="true">
-              Hero photo —<br />Woody at the rig
-            </div>
+          <GlareHover
+            className="hero-photo"
+            glareColor="#f1e7d1"
+            glareOpacity={0.22}
+            glareAngle={-40}
+            glareSize={240}
+            transitionDuration={700}
+          >
+            <img
+              src="/assets/images/Woody_Repairing_RV.png"
+              alt="Woody repairing an RV on-site"
+              className="hero-photo-img"
+              loading="eager"
+            />
             <div className="hero-stamp" aria-hidden="true">
               <span className="stamp-tiny">No tow</span>
               <span className="stamp-big">FIXED</span>
               <span className="stamp-tiny">on site</span>
             </div>
-          </div>
+          </GlareHover>
         </div>
       </section>
 

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
+import SpotlightCard from '../components/SpotlightCard';
 
 const SERVICES = [
   {
@@ -79,19 +80,23 @@ const SERVICES = [
 function ServiceCard({ num, icon, title, desc, items }) {
   const ref = useReveal();
   return (
-    <article className="card-ticket reveal" ref={ref}>
+    <SpotlightCard
+      ref={ref}
+      className="card-ticket reveal"
+      spotlightColor="rgba(217, 106, 53, 0.18)"
+    >
       <span className="card-num">{num}</span>
       <div className="card-icon" aria-hidden="true">{icon}</div>
       <h3>{title}</h3>
       <p>{desc}</p>
       <ul>{items.map(it => <li key={it}>{it}</li>)}</ul>
-    </article>
+    </SpotlightCard>
   );
 }
 
 export default function Services() {
   useEffect(() => {
-    document.title = "Services — Woody's Mobile RV Tech | Beebe, AR";
+    document.title = "Services — Diamond RV Solutions | Beebe, AR";
   }, []);
 
   const headRef = useReveal();

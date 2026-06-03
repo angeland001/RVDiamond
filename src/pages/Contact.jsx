@@ -3,7 +3,7 @@ import { useReveal } from '../hooks/useReveal';
 
 export default function Contact() {
   useEffect(() => {
-    document.title = "Contact — Woody's Mobile RV Tech | Beebe, AR";
+    document.title = "Contact — Diamond RV Solutions | Beebe, AR";
   }, []);
 
   const headRef = useReveal();

@@ -1,5 +1,8 @@
 import { useEffect } from 'react';
 import { useReveal } from '../hooks/useReveal';
+import CountUp from '../components/CountUp';
+import BlurText from '../components/BlurText';
+import GlareHover from '../components/GlareHover';
 
 const CheckIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -9,7 +12,7 @@ const CheckIcon = () => (
 
 export default function About() {
   useEffect(() => {
-    document.title = "About — Woody's Mobile RV Tech | Beebe, AR";
+    document.title = "About — Diamond RV Solutions | Beebe, AR";
   }, []);
 
   const photoRef = useReveal();
@@ -21,14 +24,34 @@ export default function About() {
         <div className="about-inner">
           <div className="about-photo reveal" ref={photoRef}>
             <div className="tape" aria-hidden="true"></div>
-            <div className="about-photo-placeholder" aria-label="Portrait of Woody or shop photo">
-              Woody portrait<br />or shop shot
-            </div>
+            <GlareHover
+              glareColor="#f1e7d1"
+              glareOpacity={0.2}
+              glareAngle={-40}
+              glareSize={200}
+              transitionDuration={700}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+            >
+              <img
+                src="/assets/images/Woody_with_wife.JPEG"
+                alt="Woody and his wife"
+                className="about-photo-img"
+                loading="lazy"
+              />
+            </GlareHover>
           </div>
 
           <div className="about-copy reveal" ref={copyRef}>
             <span className="eyebrow">About</span>
-            <h1 id="about-heading">Twelve years under rigs. One guy on the truck.</h1>
+            <h1 id="about-heading">
+              <BlurText
+                text="Twelve years under rigs. One guy on the truck."
+                animateBy="words"
+                delay={70}
+                stepDuration={0.4}
+                direction="bottom"
+              />
+            </h1>
             <p>
               Woody started turning wrenches on RVs in 2014 after a decade in heavy-truck
               and HVAC service. He went mobile in 2019 because the dealers in central Arkansas
@@ -42,15 +65,21 @@ export default function About() {
 
             <div className="about-stats" aria-label="At-a-glance stats">
               <div className="stat">
-                <span className="stat-num display">12+</span>
+                <span className="stat-num display">
+                  <CountUp to={12} from={0} duration={2} delay={0.2} />+
+                </span>
                 <span className="stat-label">Years wrenching</span>
               </div>
               <div className="stat">
-                <span className="stat-num display">1,400</span>
+                <span className="stat-num display">
+                  <CountUp to={1400} from={0} duration={2.5} delay={0.3} separator="," />
+                </span>
                 <span className="stat-label">Rigs serviced</span>
               </div>
               <div className="stat">
-                <span className="stat-num display">60 mi</span>
+                <span className="stat-num display">
+                  <CountUp to={60} from={0} duration={1.8} delay={0.1} /> mi
+                </span>
                 <span className="stat-label">Service radius</span>
               </div>
             </div>

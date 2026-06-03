@@ -242,7 +242,8 @@
   line-height: 1;
   margin: 0;
   color: var(--cream);
-  transform: translateY(calc((1 - var(--p, 0)) * 24px));
+  text-align: center;
+  width: 100%;
 }
 .scroll-anim-title .accent { color: var(--accent-glow); }
 .scroll-anim-sub {
@@ -253,6 +254,21 @@
   text-transform: uppercase;
   color: var(--cream-2);
   max-width: 60ch;
+}
+
+/* ── SplitText ── */
+.split-char {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 40px, 0);
+  transition:
+    opacity var(--split-dur, 1.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94),
+    transform var(--split-dur, 1.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: var(--split-delay, 0ms);
+}
+.split-char--visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .scroll-anim-frame {
