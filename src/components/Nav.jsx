@@ -41,10 +41,15 @@ export default function Nav() {
     <>
       <header className="nav" role="banner">
         <div className="nav-inner">
-          <Link className="wordmark" to="/" aria-label="Woody's Mobile RV Tech — home">
-            <span className="wordmark-badge" aria-hidden="true">W</span>
+          <Link className="wordmark" to="/" aria-label="Diamond RV Solutions — home">
+            <img
+              src="/assets/logo/Diamond_Logo.png"
+              alt=""
+              className="wordmark-badge-img"
+              aria-hidden="true"
+            />
             <span className="wordmark-text">
-              <span className="name">WOODY'S</span>
+              <span className="name">DIAMOND RV SOLUTIONS</span>
               <span className="sub">Mobile RV Tech · Est. '14</span>
             </span>
           </Link>
@@ -100,7 +105,7 @@ export default function Nav() {
             {label}
           </Link>
         ))}
-        <div className="nav-drawer-tagline">Mobile · Beebe, AR · Est. '14</div>
+        <div className="nav-drawer-tagline">Diamond RV Solutions · Beebe, AR · Est. '14</div>
       </nav>
     </>
   );

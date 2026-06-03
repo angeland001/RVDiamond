@@ -84,7 +84,7 @@ export default function Coverage() {
   const areaRef  = useReveal();
 
   useEffect(() => {
-    document.title = "Coverage — Woody's Mobile RV Tech | Beebe, AR";
+    document.title = "Coverage — Diamond RV Solutions | Beebe, AR";
   }, []);
 
   useEffect(() => {

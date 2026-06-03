@@ -41,13 +41,13 @@ export default function PageLoader({ tag = 'Loading…' }) {
   }, []);
 
   return (
-    <div className="page-loader" ref={loaderRef} role="status" aria-live="polite" aria-label="Loading Woody's Mobile RV Tech">
+    <div className="page-loader" ref={loaderRef} role="status" aria-live="polite" aria-label="Loading Diamond RV Solutions">
       <div className="loader-stage">
         <div className="loader-gears" aria-hidden="true">
           <div className="loader-gear loader-gear--big"><GearSVG /></div>
           <div className="loader-gear loader-gear--small"><GearSVG /></div>
         </div>
-        <div className="loader-wordmark display">WOODY'<span className="accent">S</span></div>
+        <div className="loader-wordmark display">DIAMOND <span className="accent">RV</span></div>
         <div className="loader-tag">{tag}</div>
         <div className="loader-progress" aria-hidden="true"></div>
       </div>
