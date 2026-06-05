@@ -251,16 +251,13 @@
   color: var(--ink);
 }
 .hero-headline .accent-text { color: var(--accent); }
-.hero-headline .underline-mark { display: inline; position: relative; }
-.hero-headline .underline-mark::after {
-  content: "";
-  position: absolute;
-  left: -2px; right: -2px; bottom: .05em;
-  height: .18em;
-  background: var(--accent);
-  z-index: -1;
-  transform: skewX(-8deg);
-  opacity: .85;
+.hero-headline .underline-mark {
+  display: inline;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: .12em;
+  text-underline-offset: .18em;
+  text-decoration-skip-ink: none;
 }
 .hero-sub {
   font-size: 16px;
@@ -454,6 +451,52 @@
   text-transform: uppercase;
 }
 .qb-desc { font-size: 13px; color: var(--ink-2); }
+
+/* Free Service Call Fee promo banner */
+.promo-wrap {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 20px 16px 0;
+}
+@media (min-width: 860px) { .promo-wrap { padding: 28px 32px 0; } }
+
+.promo-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--accent);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  margin-bottom: 32px;
+}
+.promo-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  flex-shrink: 0;
+  color: var(--cream);
+}
+.promo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.promo-headline {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--cream);
+  line-height: 1.2;
+}
+.promo-disclaimer {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  color: rgba(241, 231, 209, 0.75);
+}
 
 /* ════════════════════════ COVERAGE AREA ════════════════════════ */
 .area {

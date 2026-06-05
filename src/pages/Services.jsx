@@ -110,6 +110,18 @@ export default function Services() {
           <p>I'm not a generalist with a tool belt. Every job below is something I do weekly, with the parts and diagnostic gear on the truck to finish in one visit.</p>
         </div>
 
+        <div className="promo-banner" role="region" aria-label="Special offer">
+          <span className="promo-tag" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <div className="promo-text">
+            <span className="promo-headline">Free Service Call Fee</span>
+            <span className="promo-disclaimer">* when a repair is performed</span>
+          </div>
+        </div>
+
         <div className="quote-banner">
           <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
             <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />

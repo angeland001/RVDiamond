@@ -235,14 +235,14 @@ export default function Home() {
             <div className="scroll-anim-stage">
               <span className="scroll-anim-eyebrow">Diamond RV Solutions · Beebe, AR</span>
               <h1 className="scroll-anim-title display" aria-label="RV down? I fix it on-site.">
-                <SplitText text="RV down?" delay={75} duration={0.8} startIndex={0} />
+                <SplitText text="RV down?" delay={120} duration={1.4} startIndex={0} />
                 {' '}
                 <span className="accent" aria-hidden="true">
-                  <SplitText text="I fix it on-site." delay={75} duration={0.8} startIndex={7} />
+                  <SplitText text="I fix it on-site." delay={120} duration={1.4} startIndex={7} />
                 </span>
               </h1>
               <p className="scroll-anim-sub" aria-label="One call. Same tech. Same day. No tow.">
-                <SplitText text="One call. Same tech. Same day. No tow." delay={75} duration={0.8} />
+                <SplitText text="One call. Same tech. Same day. No tow." delay={120} duration={1.4} />
               </p>
             </div>
 
@@ -262,7 +262,7 @@ export default function Home() {
           <div className="hero-copy">
             <span className="eyebrow">Beebe, Arkansas · Mobile Service</span>
             <h2 className="hero-headline display">
-              Your rig <span className="underline-mark">won't fix itself.</span><br />
+              Your RV <span className="underline-mark">won't fix itself.</span><br />
               <span className="accent-text">I come to you.</span>
             </h2>
             <p className="hero-sub">
@@ -271,7 +271,7 @@ export default function Home() {
               within an hour of central Arkansas.
             </p>
             <ul className="hero-bullets" aria-label="Certifications and highlights">
-              <li><CheckIcon />RVTI-Certified</li>
+              <li><CheckIcon />RVTAA Certified</li>
               <li><CheckIcon />Insured</li>
               <li><CheckIcon />12 yrs in the trade</li>
               <li><CheckIcon />All brands</li>
@@ -310,6 +310,21 @@ export default function Home() {
           </GlareHover>
         </div>
       </section>
+
+      {/* ── Free Service Call promo ── */}
+      <div className="promo-wrap">
+        <div className="promo-banner" role="region" aria-label="Special offer">
+          <span className="promo-tag" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <div className="promo-text">
+            <span className="promo-headline">Free Service Call Fee</span>
+            <span className="promo-disclaimer">* when a repair is performed</span>
+          </div>
+        </div>
+      </div>
 
       {/* ── Marquee ── */}
       <div className="marquee-strip" aria-hidden="true" role="presentation">
