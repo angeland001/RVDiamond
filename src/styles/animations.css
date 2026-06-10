@@ -315,16 +315,127 @@
   .scroll-anim-hint { display: none; }
 }
 
+/* ════════════════════════ CARD ILLUSTRATIONS ════════════════════════ */
+
+/* AC fan spin */
+.illus-ac-fan {
+  transform-box: view-box;
+  transform-origin: 40.9% 47.7%; /* 18/44, 21/44 — fan center */
+  animation: illus-spin-fast 1.5s linear infinite;
+}
+
+/* Snowflake spin */
+.illus-snowflake {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: illus-spin-slow 9s linear infinite;
+}
+
+/* Floating tiny snowflakes */
+.illus-snow {
+  animation: illus-snow-float 2s ease-out infinite;
+}
+
+/* Lightning bolt pulse */
+.illus-bolt {
+  animation: illus-bolt-pulse 1.1s ease-in-out infinite;
+}
+
+/* Arc sparks flicker */
+.illus-arc {
+  animation: illus-arc-flash 1.8s ease-in-out infinite;
+}
+
+/* Water drops fall */
+.illus-drop {
+  animation: illus-drop-fall 1.6s ease-in infinite;
+}
+
+/* Sun glow pulse */
+.illus-sun-glow {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: illus-glow-pulse 2.2s ease-in-out infinite;
+}
+
+/* Sun ray fade stagger */
+.illus-ray {
+  animation: illus-ray-fade 2s ease-in-out infinite;
+}
+
+/* Magnifying glass scan */
+.illus-mag-glass {
+  animation: illus-glass-scan 2.6s ease-in-out infinite;
+}
+
+@keyframes illus-spin-fast {
+  to { transform: rotate(360deg); }
+}
+@keyframes illus-spin-slow {
+  to { transform: rotate(360deg); }
+}
+@keyframes illus-drop-fall {
+  0%   { transform: translateY(0);     opacity: 1;   }
+  75%  {                               opacity: 0.8; }
+  100% { transform: translateY(9px);   opacity: 0;   }
+}
+@keyframes illus-bolt-pulse {
+  0%, 100% { opacity: 1;   }
+  50%       { opacity: 0.5; }
+}
+@keyframes illus-arc-flash {
+  0%, 100% { opacity: 0;   }
+  35%, 65%  { opacity: 1;   }
+  50%       { opacity: 0.25; }
+}
+@keyframes illus-snow-float {
+  0%   { transform: translateY(0);    opacity: 0.8; }
+  100% { transform: translateY(-9px); opacity: 0;   }
+}
+@keyframes illus-glow-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.14; }
+  50%       { transform: scale(1.55); opacity: 0;    }
+}
+@keyframes illus-ray-fade {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1;   }
+}
+@keyframes illus-glass-scan {
+  0%, 100% { transform: translateX(0);    }
+  50%       { transform: translateX(-11px); }
+}
+
 /* ════════════════════════ BANNER CAR ════════════════════════ */
-.banner-car {
+.banner-car-wrap {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 38px;
-  width: auto;
   pointer-events: none;
   animation: banner-car-drive 11s linear infinite;
   will-change: transform, opacity;
+}
+
+.banner-car-wrap img {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+.banner-car-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 160%;
+  height: 10px;
+  background: radial-gradient(ellipse at center,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.45) 40%,
+    transparent               72%
+  );
+  border-radius: 50%;
+  z-index: 2;
+  animation: banner-glow-pulse .75s ease-in-out infinite alternate;
 }
 
 @keyframes banner-car-drive {
@@ -335,6 +446,12 @@
   100% { transform: translateX(calc(100vw + 160px))  translateY(0); opacity: 0; }
 }
 
+@keyframes banner-glow-pulse {
+  from { opacity: .5;  transform: translateX(-50%) scaleX(.88); }
+  to   { opacity: .95; transform: translateX(-50%) scaleX(1.12); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .banner-car { animation: none; opacity: 0; }
+  .banner-car-wrap { animation: none; opacity: 0; }
+  .banner-car-wrap::after { animation: none; }
 }

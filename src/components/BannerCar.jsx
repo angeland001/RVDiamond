@@ -1,10 +1,7 @@
 export default function BannerCar() {
   return (
-    <img
-      className="banner-car"
-      src="/assets/gifs/RedCar.gif"
-      alt=""
-      aria-hidden="true"
-    />
+    <div className="banner-car-wrap" aria-hidden="true">
+      <img src="/assets/gifs/RedCar.gif" alt="" />
+    </div>
   );
 }

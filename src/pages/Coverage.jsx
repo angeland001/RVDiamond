@@ -95,8 +95,6 @@ export default function Coverage() {
       return;
     }
 
-    if (document.getElementById('gmaps-script')) return;
-
     window.initCoverageMap = function () {
       const el = mapRef.current;
       if (!el || !window.google) return;
@@ -206,6 +204,13 @@ export default function Coverage() {
 
       google.maps.event.addListenerOnce(map, 'idle', () => map.fitBounds(bounds, 56));
     };
+
+    if (window.google?.maps) {
+      window.initCoverageMap();
+      return;
+    }
+
+    if (document.getElementById('gmaps-script')) return;
 
     const script = document.createElement('script');
     script.id  = 'gmaps-script';
