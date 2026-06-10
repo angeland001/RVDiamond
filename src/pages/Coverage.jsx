@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useReveal } from '../hooks/useReveal';
+import BannerCar from '../components/BannerCar';
 
 const HQ = { lat: 35.0723, lng: -91.8837 };
 
@@ -263,6 +264,7 @@ export default function Coverage() {
           </svg>
           (501) 555-0199
         </a>
+        <BannerCar />
       </section>
     </>
   );

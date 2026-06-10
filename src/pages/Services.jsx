@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
 import SpotlightCard from '../components/SpotlightCard';
+import BannerCar from '../components/BannerCar';
 
 const SERVICES = [
   {
@@ -104,10 +105,12 @@ export default function Services() {
   return (
     <>
       <section className="section" aria-labelledby="services-heading">
-        <div className="section-head reveal" ref={headRef}>
-          <span className="eyebrow">What I fix</span>
-          <h1 id="services-heading">Six things, done right.</h1>
-          <p>I'm not a generalist with a tool belt. Every job below is something I do weekly, with the parts and diagnostic gear on the truck to finish in one visit.</p>
+        <div className="services-intro">
+          <div className="section-head reveal" ref={headRef}>
+            <span className="eyebrow">What I fix</span>
+            <h1 id="services-heading">Six things, done right.</h1>
+            <p>I'm not a generalist with a tool belt. Every job below is something I do weekly, with the parts and diagnostic gear on the truck to finish in one visit.</p>
+          </div>
         </div>
 
         <div className="promo-banner" role="region" aria-label="Special offer">
@@ -147,6 +150,7 @@ export default function Services() {
           </svg>
           (501) 555-0199
         </a>
+        <BannerCar />
       </section>
     </>
   );
