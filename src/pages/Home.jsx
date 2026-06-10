@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import SplitText from '../components/SplitText';
 import GlareHover from '../components/GlareHover';
 import ClickSpark from '../components/ClickSpark';
+import BannerCar from '../components/BannerCar';
 
 const TOTAL_FRAMES = 121;
 const BATCH_SIZE   = 20;
@@ -36,11 +37,13 @@ export default function Home() {
   useEffect(() => {
     const canvas    = canvasRef.current;
     const runway    = runwayRef.current;
+    const root      = scrollRoot.current;
     const loader    = loaderRef.current;
     const loaderBar = loaderBarRef.current;
     if (!canvas || !runway) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root?.style.setProperty('--p', '1');
       loader?.remove();
       return;
     }
@@ -51,27 +54,33 @@ export default function Home() {
     let rafPending   = false;
     let dpr          = 1;
     let alive        = true;
+    let canvasW      = 0;
+    let canvasH      = 0;
+    let lastP        = -1;
 
     function resizeCanvas() {
-      dpr = window.devicePixelRatio || 1;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
       const container = canvas.parentElement;
       const w = container.clientWidth;
       const h = container.clientHeight;
       if (!w || !h) return;
+      canvasW = w;
+      canvasH = h;
       canvas.width  = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width  = w + 'px';
       canvas.style.height = h + 'px';
-      ctx.scale(dpr, dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'medium';
       drawFrame(currentFrame);
     }
 
     function drawFrame(index) {
       const img = frames[Math.min(Math.max(0, index), TOTAL_FRAMES - 1)];
       if (!img) return;
-      const container = canvas.parentElement;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
+      const w = canvasW;
+      const h = canvasH;
       if (!w || !h) return;
       ctx.clearRect(0, 0, w, h);
       const scale = Math.max(w / img.width, h / img.height);
@@ -81,9 +90,19 @@ export default function Home() {
     }
 
     function loadImage(src) {
+      if ('createImageBitmap' in window) {
+        return fetch(src)
+          .then(response => (response.ok ? response.blob() : null))
+          .then(blob => (blob ? createImageBitmap(blob) : null))
+          .catch(() => null);
+      }
+
       return new Promise(resolve => {
         const img = new Image();
-        img.onload  = () => resolve(img);
+        img.onload  = () => {
+          if (img.decode) img.decode().catch(() => {}).finally(() => resolve(img));
+          else resolve(img);
+        };
         img.onerror = () => resolve(null);
         img.src = src;
       });
@@ -110,6 +129,10 @@ export default function Home() {
       const scrolled  = Math.min(scrubable, scrollY);
       const progress  = scrolled / scrubable;
       const newFrame  = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
+      if (root && Math.abs(progress - lastP) > 0.002) {
+        root.style.setProperty('--p', progress.toFixed(4));
+        lastP = progress;
+      }
       if (newFrame !== currentFrame) { currentFrame = newFrame; drawFrame(currentFrame); }
     }
 
@@ -130,7 +153,7 @@ export default function Home() {
     }
 
     document.body.classList.add('canvas-loading');
-    dpr = window.devicePixelRatio || 1;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
     const container = canvas.parentElement;
     const w = container.clientWidth || 980;
     const h = container.clientHeight || Math.round(980 * 9 / 16);
@@ -138,7 +161,9 @@ export default function Home() {
     canvas.height = Math.floor(h * dpr);
     canvas.style.width  = w + 'px';
     canvas.style.height = h + 'px';
-    ctx.scale(dpr, dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'medium';
 
     let batchStart = 0;
     function loadNextBatch() {
@@ -172,46 +197,6 @@ export default function Home() {
     };
   }, []);
 
-  // Scroll progress CSS custom property for the overlay + title parallax
-  useEffect(() => {
-    const root   = scrollRoot.current;
-    const runway = runwayRef.current;
-    if (!root || !runway) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      root.style.setProperty('--p', '1');
-      return;
-    }
-
-    let ticking = false;
-    let lastP   = -1;
-
-    function update() {
-      ticking = false;
-      const rect      = runway.getBoundingClientRect();
-      const viewH     = window.innerHeight;
-      const scrubable = Math.max(1, rect.height - viewH);
-      const scrolled  = Math.min(scrubable, Math.max(0, -rect.top));
-      const p = scrolled / scrubable;
-      if (Math.abs(p - lastP) > 0.002) {
-        root.style.setProperty('--p', p.toFixed(4));
-        lastP = p;
-      }
-    }
-
-    function onScroll() {
-      if (!ticking) { requestAnimationFrame(update); ticking = true; }
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    update();
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
-  }, []);
-
   return (
     <>
       {/* ── Scroll animation ── */}
@@ -235,14 +220,14 @@ export default function Home() {
             <div className="scroll-anim-stage">
               <span className="scroll-anim-eyebrow">Diamond RV Solutions · Beebe, AR</span>
               <h1 className="scroll-anim-title display" aria-label="RV down? I fix it on-site.">
-                <SplitText text="RV down?" delay={75} duration={0.8} startIndex={0} />
+                <SplitText text="RV down?" delay={120} duration={1.4} startIndex={0} />
                 {' '}
                 <span className="accent" aria-hidden="true">
-                  <SplitText text="I fix it on-site." delay={75} duration={0.8} startIndex={7} />
+                  <SplitText text="I fix it on-site." delay={120} duration={1.4} startIndex={7} />
                 </span>
               </h1>
               <p className="scroll-anim-sub" aria-label="One call. Same tech. Same day. No tow.">
-                <SplitText text="One call. Same tech. Same day. No tow." delay={75} duration={0.8} />
+                <SplitText text="One call. Same tech. Same day. No tow." delay={120} duration={1.4} />
               </p>
             </div>
 
@@ -262,7 +247,7 @@ export default function Home() {
           <div className="hero-copy">
             <span className="eyebrow">Beebe, Arkansas · Mobile Service</span>
             <h2 className="hero-headline display">
-              Your rig <span className="underline-mark">won't fix itself.</span><br />
+              Your RV <span className="underline-mark">won't fix itself.</span><br />
               <span className="accent-text">I come to you.</span>
             </h2>
             <p className="hero-sub">
@@ -271,7 +256,7 @@ export default function Home() {
               within an hour of central Arkansas.
             </p>
             <ul className="hero-bullets" aria-label="Certifications and highlights">
-              <li><CheckIcon />RVTI-Certified</li>
+              <li><CheckIcon />RVTAA Certified</li>
               <li><CheckIcon />Insured</li>
               <li><CheckIcon />12 yrs in the trade</li>
               <li><CheckIcon />All brands</li>
@@ -311,6 +296,22 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Free Service Call promo ── */}
+      <div className="promo-wrap">
+        <div className="promo-banner" role="region" aria-label="Special offer">
+          <span className="promo-tag" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </span>
+          <div className="promo-text">
+            <span className="promo-headline">Free Service Call Fee</span>
+            <span className="promo-disclaimer">* when a repair is performed</span>
+          </div>
+          
+        </div>
+      </div>
+
       {/* ── Marquee ── */}
       <div className="marquee-strip" aria-hidden="true" role="presentation">
         <div className="marquee-track">
@@ -327,6 +328,7 @@ export default function Home() {
         <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
           <PhoneIcon />(501) 555-0199
         </a>
+        <BannerCar />
       </section>
     </>
   );

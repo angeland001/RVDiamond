@@ -3,6 +3,7 @@ import { useReveal } from '../hooks/useReveal';
 import CountUp from '../components/CountUp';
 import BlurText from '../components/BlurText';
 import GlareHover from '../components/GlareHover';
+import BannerCar from '../components/BannerCar';
 
 const CheckIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -53,14 +54,15 @@ export default function About() {
               />
             </h1>
             <p>
-              Woody started turning wrenches on RVs in 2014 after a decade in heavy-truck
-              and HVAC service. He went mobile in 2019 because the dealers in central Arkansas
-              were quoting six-week waits for jobs he could finish in an afternoon.
+              Camping and traveling have been part of my life for as long as I can remember.
+              That time on the road gave me a firsthand understanding of what it feels like
+              when something goes wrong far from home — and a genuine passion for helping
+              people through it.
             </p>
             <p>
-              Every job is Woody — no apprentices, no rotating subs. You'll get a real time
-              window, a real diagnosis, and a written invoice. If it can't be fixed on the
-              truck, you'll know why before parts get ordered.
+              I started Diamond RV Solutions to make the rough moments smooth. Every job gets
+              real attention to what you need and the skills to back it up — no runaround,
+              no guesswork, just the work done right.
             </p>
 
             <div className="about-stats" aria-label="At-a-glance stats">
@@ -85,7 +87,7 @@ export default function About() {
             </div>
 
             <div className="about-creds" aria-label="Certifications">
-              <span className="chip"><CheckIcon />RVTI Level 1</span>
+              <span className="chip"><CheckIcon />RVTAA Certified RV Service Technician</span>
               <span className="chip"><CheckIcon />EPA 608</span>
               <span className="chip"><CheckIcon />Insured &amp; Bonded</span>
             </div>
@@ -102,6 +104,7 @@ export default function About() {
           </svg>
           (501) 555-0199
         </a>
+        <BannerCar />
       </section>
     </>
   );

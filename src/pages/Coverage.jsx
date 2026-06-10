@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useReveal } from '../hooks/useReveal';
+import BannerCar from '../components/BannerCar';
 
 const HQ = { lat: 35.0723, lng: -91.8837 };
 
@@ -93,8 +94,6 @@ export default function Coverage() {
       console.warn('[Coverage] Add VITE_MAPS_API_KEY to your .env file');
       return;
     }
-
-    if (document.getElementById('gmaps-script')) return;
 
     window.initCoverageMap = function () {
       const el = mapRef.current;
@@ -206,6 +205,13 @@ export default function Coverage() {
       google.maps.event.addListenerOnce(map, 'idle', () => map.fitBounds(bounds, 56));
     };
 
+    if (window.google?.maps) {
+      window.initCoverageMap();
+      return;
+    }
+
+    if (document.getElementById('gmaps-script')) return;
+
     const script = document.createElement('script');
     script.id  = 'gmaps-script';
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initCoverageMap&loading=async`;
@@ -263,6 +269,7 @@ export default function Coverage() {
           </svg>
           (501) 555-0199
         </a>
+        <BannerCar />
       </section>
     </>
   );
