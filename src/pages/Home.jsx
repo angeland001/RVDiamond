@@ -165,6 +165,26 @@ export default function Home() {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'medium';
 
+    // On mobile, skip the 8.7MB frame sequence — just show the first frame statically.
+    // Decoded WebP frames are ~6–8MB each; 121 in memory crashes Safari on iOS.
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+    if (isMobile) {
+      loadImage('/assets/frames/frame-0001.webp').then(img => {
+        if (!alive) return;
+        frames[0] = img;
+        resizeCanvas();
+        if (loader?.parentNode) loader.parentNode.removeChild(loader);
+        document.body.classList.remove('canvas-loading');
+        root?.style.setProperty('--p', '1');
+        window.addEventListener('resize', resizeCanvas, { passive: true });
+      });
+      return () => {
+        alive = false;
+        window.removeEventListener('resize', resizeCanvas);
+        document.body.classList.remove('canvas-loading');
+      };
+    }
+
     let batchStart = 0;
     function loadNextBatch() {
       if (!alive) return;
