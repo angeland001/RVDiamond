@@ -5,8 +5,6 @@ import GlareHover from '../components/GlareHover';
 import ClickSpark from '../components/ClickSpark';
 import BannerCar from '../components/BannerCar';
 
-const TOTAL_FRAMES = 121;
-const BATCH_SIZE   = 20;
 
 const CheckIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -27,19 +25,17 @@ export default function Home() {
   const runwayRef    = useRef(null);
   const scrollRoot   = useRef(null);
   const loaderRef    = useRef(null);
-  const loaderBarRef = useRef(null);
 
   useEffect(() => {
     document.title = "Diamond RV Solutions — On-Site RV Repair | Beebe, AR";
   }, []);
 
-  // Canvas frame-sequence scroll animation
+  // Video-scrub scroll animation — single 0.67 MB MP4 instead of 121 separate images
   useEffect(() => {
-    const canvas    = canvasRef.current;
-    const runway    = runwayRef.current;
-    const root      = scrollRoot.current;
-    const loader    = loaderRef.current;
-    const loaderBar = loaderBarRef.current;
+    const canvas = canvasRef.current;
+    const runway = runwayRef.current;
+    const root   = scrollRoot.current;
+    const loader = loaderRef.current;
     if (!canvas || !runway) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -49,14 +45,18 @@ export default function Home() {
     }
 
     const ctx = canvas.getContext('2d');
-    const frames = new Array(TOTAL_FRAMES);
-    let currentFrame = 0;
-    let rafPending   = false;
-    let dpr          = 1;
-    let alive        = true;
-    let canvasW      = 0;
-    let canvasH      = 0;
-    let lastP        = -1;
+    let alive      = true;
+    let rafPending = false;
+    let canvasW    = 0;
+    let canvasH    = 0;
+    let dpr        = 1;
+    let lastP      = -1;
+
+    const video = document.createElement('video');
+    video.muted       = true;
+    video.playsInline = true;
+    video.preload     = 'auto';
+    video.src         = '/assets/rv-animation.mp4';
 
     function resizeCanvas() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -64,8 +64,7 @@ export default function Home() {
       const w = container.clientWidth;
       const h = container.clientHeight;
       if (!w || !h) return;
-      canvasW = w;
-      canvasH = h;
+      canvasW = w; canvasH = h;
       canvas.width  = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width  = w + 'px';
@@ -73,50 +72,22 @@ export default function Home() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'medium';
-      drawFrame(currentFrame);
+      drawCurrentFrame();
     }
 
-    function drawFrame(index) {
-      const img = frames[Math.min(Math.max(0, index), TOTAL_FRAMES - 1)];
-      if (!img) return;
-      const w = canvasW;
-      const h = canvasH;
-      if (!w || !h) return;
-      ctx.clearRect(0, 0, w, h);
-      const scale = Math.max(w / img.width, h / img.height);
-      const dx = (w - img.width  * scale) / 2;
-      const dy = (h - img.height * scale) / 2;
-      ctx.drawImage(img, dx, dy, img.width * scale, img.height * scale);
-    }
-
-    function loadImage(src) {
-      if ('createImageBitmap' in window) {
-        return fetch(src)
-          .then(response => (response.ok ? response.blob() : null))
-          .then(blob => (blob ? createImageBitmap(blob) : null))
-          .catch(() => null);
-      }
-
-      return new Promise(resolve => {
-        const img = new Image();
-        img.onload  = () => {
-          if (img.decode) img.decode().catch(() => {}).finally(() => resolve(img));
-          else resolve(img);
-        };
-        img.onerror = () => resolve(null);
-        img.src = src;
-      });
-    }
-
-    function updateProgress(loaded) {
-      if (loaderBar) loaderBar.style.width = Math.round((loaded / TOTAL_FRAMES) * 100) + '%';
+    function drawCurrentFrame() {
+      if (!video.readyState || !canvasW || !canvasH) return;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (!vw || !vh) return;
+      ctx.clearRect(0, 0, canvasW, canvasH);
+      const scale = Math.max(canvasW / vw, canvasH / vh);
+      const dx = (canvasW - vw * scale) / 2;
+      const dy = (canvasH - vh * scale) / 2;
+      ctx.drawImage(video, dx, dy, vw * scale, vh * scale);
     }
 
     function onScroll() {
-      if (!rafPending && alive) {
-        rafPending = true;
-        requestAnimationFrame(tick);
-      }
+      if (!rafPending && alive) { rafPending = true; requestAnimationFrame(tick); }
     }
 
     function tick() {
@@ -126,31 +97,28 @@ export default function Home() {
       const viewH     = window.innerHeight;
       const scrubable = Math.max(1, rect.height - viewH);
       const scrollY   = window.pageYOffset || document.documentElement.scrollTop;
-      const scrolled  = Math.min(scrubable, scrollY);
-      const progress  = scrolled / scrubable;
-      const newFrame  = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
+      const progress  = Math.min(scrubable, scrollY) / scrubable;
       if (root && Math.abs(progress - lastP) > 0.002) {
         root.style.setProperty('--p', progress.toFixed(4));
         lastP = progress;
       }
-      if (newFrame !== currentFrame) { currentFrame = newFrame; drawFrame(currentFrame); }
+      if (video.duration) video.currentTime = progress * video.duration;
     }
 
-    function startAnimation() {
+    video.addEventListener('seeked', drawCurrentFrame);
+
+    video.addEventListener('loadeddata', () => {
+      if (!alive) return;
       resizeCanvas();
-      window.addEventListener('resize', resizeCanvas, { passive: true });
-      window.addEventListener('scroll', onScroll, { passive: true });
-      onScroll();
-    }
-
-    function onAllLoaded() {
       if (loader) {
         loader.dataset.state = 'done';
         setTimeout(() => { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 400);
       }
       document.body.classList.remove('canvas-loading');
-      startAnimation();
-    }
+      window.addEventListener('resize', resizeCanvas, { passive: true });
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    });
 
     document.body.classList.add('canvas-loading');
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -162,58 +130,13 @@ export default function Home() {
     canvas.style.width  = w + 'px';
     canvas.style.height = h + 'px';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'medium';
-
-    // On mobile, skip the 8.7MB frame sequence — just show the first frame statically.
-    // Decoded WebP frames are ~6–8MB each; 121 in memory crashes Safari on iOS.
-    const isMobile = window.matchMedia('(max-width: 767px)').matches;
-    if (isMobile) {
-      loadImage('/assets/frames/frame-0001.webp').then(img => {
-        if (!alive) return;
-        frames[0] = img;
-        resizeCanvas();
-        if (loader?.parentNode) loader.parentNode.removeChild(loader);
-        document.body.classList.remove('canvas-loading');
-        root?.style.setProperty('--p', '1');
-        window.addEventListener('resize', resizeCanvas, { passive: true });
-      });
-      return () => {
-        alive = false;
-        window.removeEventListener('resize', resizeCanvas);
-        document.body.classList.remove('canvas-loading');
-      };
-    }
-
-    let batchStart = 0;
-    function loadNextBatch() {
-      if (!alive) return;
-      if (batchStart >= TOTAL_FRAMES) { onAllLoaded(); return; }
-      const start = batchStart;
-      const end   = Math.min(batchStart + BATCH_SIZE, TOTAL_FRAMES);
-      batchStart  = end;
-      const promises = [];
-      for (let j = start; j < end; j++) {
-        const idx = j;
-        const num = String(idx + 1).padStart(4, '0');
-        promises.push(
-          loadImage(`/assets/frames/frame-${num}.webp`).then(img => { frames[idx] = img; })
-        );
-      }
-      Promise.all(promises).then(() => {
-        if (!alive) return;
-        updateProgress(end);
-        if (start === 0 && frames[0]) resizeCanvas();
-        loadNextBatch();
-      });
-    }
-    loadNextBatch();
 
     return () => {
       alive = false;
       window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('scroll', onScroll);
       document.body.classList.remove('canvas-loading');
+      video.src = '';
     };
   }, []);
 
@@ -232,7 +155,7 @@ export default function Home() {
               aria-live="polite"
             >
               <div className="scroll-canvas-loader-track">
-                <div className="scroll-canvas-loader-bar" id="scroll-canvas-loader-bar" ref={loaderBarRef} />
+                <div className="scroll-canvas-loader-bar" id="scroll-canvas-loader-bar" />
               </div>
             </div>
             <div className="scroll-anim-overlay" aria-hidden="true" />
