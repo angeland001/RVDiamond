@@ -1,3 +1,7 @@
+# Dependencies
+node_modules/
+dist/
+
 # Claude Code local config (may contain API keys)
 .claude/
 
