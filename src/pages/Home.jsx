@@ -102,13 +102,19 @@ export default function Home() {
         root.style.setProperty('--p', progress.toFixed(4));
         lastP = progress;
       }
-      if (video.duration) video.currentTime = progress * video.duration;
+      if (video.duration) {
+        video.currentTime = progress * video.duration;
+        drawCurrentFrame(); // draw immediately (every frame is a keyframe, so no lag)
+      }
     }
 
-    video.addEventListener('seeked', drawCurrentFrame);
+    // Redraw on seek completion for accuracy
+    video.addEventListener('seeked', () => { if (alive) drawCurrentFrame(); });
 
-    video.addEventListener('loadeddata', () => {
+    function startAfterLoad() {
       if (!alive) return;
+      // Play/pause to unlock canvas drawing on Safari iOS
+      video.play().then(() => { video.pause(); video.currentTime = 0; }).catch(() => {});
       resizeCanvas();
       if (loader) {
         loader.dataset.state = 'done';
@@ -118,7 +124,14 @@ export default function Home() {
       window.addEventListener('resize', resizeCanvas, { passive: true });
       window.addEventListener('scroll', onScroll, { passive: true });
       onScroll();
-    });
+    }
+
+    video.addEventListener('canplaythrough', startAfterLoad, { once: true });
+    // Fallback: start as soon as first frame is available if canplaythrough is slow
+    video.addEventListener('loadeddata', () => {
+      if (!alive) return;
+      resizeCanvas(); // show first frame right away
+    }, { once: true });
 
     document.body.classList.add('canvas-loading');
     dpr = Math.min(window.devicePixelRatio || 1, 2);
