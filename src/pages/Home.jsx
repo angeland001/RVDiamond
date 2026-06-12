@@ -103,12 +103,13 @@ export default function Home() {
         lastP = progress;
       }
       if (video.duration) {
-        video.currentTime = progress * video.duration;
-        drawCurrentFrame(); // draw immediately (every frame is a keyframe, so no lag)
+        // Cap 1 frame before end so the browser never fires the 'ended' event
+        video.currentTime = Math.min(progress * video.duration, video.duration - 0.034);
       }
     }
 
-    // Redraw on seek completion for accuracy
+    // With all-keyframe video, seeked fires near-instantly — draw only here to avoid
+    // the stale-frame flash that happens when drawing before the seek resolves
     video.addEventListener('seeked', () => { if (alive) drawCurrentFrame(); });
 
     function startAfterLoad() {
