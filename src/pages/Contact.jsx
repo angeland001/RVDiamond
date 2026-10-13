@@ -1,10 +1,39 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
+import { usePageMeta } from '../hooks/usePageMeta';
+import EmergencyNote from '../components/EmergencyNote';
+import { SITE } from '../config/site';
 
 export default function Contact() {
-  useEffect(() => {
-    document.title = "Contact — Diamond RV Solutions | Beebe, AR";
-  }, []);
+  usePageMeta(
+    'Contact — Stag: Mobile RV Tech | Request Mobile RV Service',
+    'Call, text or send a service request to Stag: Mobile RV Tech. Mobile RV repair across central Arkansas, Mon–Fri 9 am – 5 pm.'
+  );
+
+  // idle | sending | sent | error
+  const [status, setStatus] = useState('idle');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
+    data.marketingOptIn = form.elements.marketingOptIn.checked;
+
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      form.reset();
+      setStatus('sent');
+    } catch {
+      setStatus('error');
+    }
+  }
 
   const headRef = useReveal();
   const cardRef = useReveal();
@@ -14,13 +43,13 @@ export default function Contact() {
     <section className="section" aria-labelledby="contact-heading">
       <div className="section-head reveal" ref={headRef}>
         <span className="eyebrow">Get in touch</span>
-        <h1 id="contact-heading">Quickest is to call.</h1>
-        <p>Most calls get a real-time quote and a slot inside the week. Prefer to write? Send the form and I'll get back the same day.</p>
+        <h1 id="contact-heading">Want Stag on the Job?</h1>
+        <p>Calling is quickest — most calls get a real-time quote and a slot inside the week. Prefer to write? Send the form and our team will get back to you the same business day.</p>
       </div>
 
       <div className="contact-inner">
         <div className="contact-card reveal" ref={cardRef}>
-          <h2>Reach Woody</h2>
+          <h2>Reach Stag</h2>
 
           <div className="contact-row">
             <span className="icon-wrap" aria-hidden="true">
@@ -30,7 +59,7 @@ export default function Contact() {
             </span>
             <div>
               <span className="label">Phone · Text</span>
-              <a href="tel:+15015550199">(501) 555-0199</a>
+              <a href={SITE.phoneHref}>{SITE.phone}</a>
             </div>
           </div>
 
@@ -42,7 +71,7 @@ export default function Contact() {
             </span>
             <div>
               <span className="label">Email</span>
-              <a href="mailto:woody@woodysrv.example">woody@woodysrv.example</a>
+              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
             </div>
           </div>
 
@@ -53,8 +82,8 @@ export default function Contact() {
               </svg>
             </span>
             <div>
-              <span className="label">Base</span>
-              <p>Beebe, AR · Mobile across central Arkansas</p>
+              <span className="label">Service Area</span>
+              <p>Headquartered in Beebe, AR · Mobile across central Arkansas</p>
             </div>
           </div>
 
@@ -66,18 +95,19 @@ export default function Contact() {
             </span>
             <div>
               <span className="label">Hours</span>
-              <p>Mon – Fri · 9 am – 5 pm</p>
+              <p>{SITE.hours}</p>
+              <EmergencyNote className="emergency-note--card" />
             </div>
           </div>
 
           <div style={{ marginTop: 4, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody now">
+            <a className="btn btn-primary" href={SITE.phoneHref} aria-label={`Call ${SITE.name} now`}>
               <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
                 <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />
               </svg>
               Call now
             </a>
-            <a className="btn btn-ghost" href="sms:+15015550199" aria-label="Text Woody">
+            <a className="btn btn-ghost" href={SITE.smsHref} aria-label={`Text ${SITE.name}`}>
               <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
                 <path d="M4 5h16v11H8l-4 4z" />
               </svg>
@@ -89,12 +119,10 @@ export default function Contact() {
         <form
           className="contact-form reveal"
           ref={formRef}
-          action="mailto:woody@woodysrv.example"
-          method="post"
-          encType="text/plain"
+          onSubmit={handleSubmit}
           aria-labelledby="form-heading"
         >
-          <h2 id="form-heading" style={{ fontFamily: 'var(--font-display)', fontSize: 28, margin: '0 0 4px', lineHeight: 1 }}>Send a job</h2>
+          <h2 id="form-heading" style={{ fontFamily: 'var(--font-display)', fontSize: 28, margin: '0 0 4px', lineHeight: 1 }}>Send a service request</h2>
           <p style={{ margin: '0 0 8px', color: 'var(--ink-2)', fontSize: 14 }}>No account, no spam. Just the basics.</p>
 
           <div className="form-row two">
@@ -110,9 +138,16 @@ export default function Contact() {
 
           <div className="form-row two">
             <div>
+              <label htmlFor="f-email">Email</label>
+              <input id="f-email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" />
+            </div>
+            <div>
               <label htmlFor="f-city">City / Town</label>
               <input id="f-city" name="city" type="text" autoComplete="address-level2" placeholder="e.g. Cabot" />
             </div>
+          </div>
+
+          <div className="form-row">
             <div>
               <label htmlFor="f-service">Service needed</label>
               <select id="f-service" name="service">
@@ -133,14 +168,47 @@ export default function Contact() {
             <textarea id="f-msg" name="message" rows={5} placeholder="Year, make, model of the rig, and a short description of the issue." />
           </div>
 
+          {/* Honeypot — hidden from people; bots fill it in and get dropped server-side */}
+          <div className="hp-field" aria-hidden="true">
+            <label htmlFor="f-website">Website</label>
+            <input id="f-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+          </div>
+
+          <div className="optin-row">
+            <input id="f-optin" name="marketingOptIn" type="checkbox" />
+            <label htmlFor="f-optin">
+              Yes, email me seasonal maintenance reminders, specials and deals from {SITE.name}.
+              Optional — unsubscribe anytime with one click.
+            </label>
+          </div>
+
+          <p className="form-legal">
+            We'll only use your details to respond to this request unless you opt in above.
+            See our <Link to="/privacy">Privacy Policy</Link>.
+          </p>
+
           <div className="submit-row">
-            <button className="btn btn-primary" type="submit">
+            <button className="btn btn-primary" type="submit" disabled={status === 'sending'}>
               <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
                 <path d="M3 20 21 12 3 4l4 8-4 8z" />
               </svg>
-              Send to Woody
+              {status === 'sending' ? 'Sending…' : 'Send request'}
             </button>
           </div>
+
+          <div aria-live="polite">
+            {status === 'sent' && (
+              <p className="form-status form-status--ok">
+                Request received — check your inbox for a confirmation. Our team will be in touch the same business day.
+              </p>
+            )}
+          </div>
+          {status === 'error' && (
+            <p className="form-status form-status--err" role="alert">
+              Something went wrong sending your request. Please call or text us at{' '}
+              <a href={SITE.phoneHref}>{SITE.phone}</a>.
+            </p>
+          )}
         </form>
       </div>
     </section>

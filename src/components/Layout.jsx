@@ -4,6 +4,8 @@ import Nav from './Nav';
 import Footer from './Footer';
 import CallBar from './CallBar';
 import PageLoader from './PageLoader';
+import CookieBanner from './CookieBanner';
+import StructuredData from './StructuredData';
 
 const LOADER_TAGS = {
   '/':         'Warming the truck',
@@ -11,6 +13,7 @@ const LOADER_TAGS = {
   '/coverage': 'Plotting the route',
   '/about':    'Pulling the story',
   '/contact':  'Ringing the shop',
+  '/privacy':  'Fetching the fine print',
 };
 
 export default function Layout() {
@@ -31,6 +34,8 @@ export default function Layout() {
       </main>
       <Footer />
       <CallBar />
+      <CookieBanner />
+      <StructuredData />
     </>
   );
 }

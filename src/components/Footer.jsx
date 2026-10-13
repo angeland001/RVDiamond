@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+import { SITE } from '../config/site';
+import { clearConsent } from '../lib/consent';
+import EmergencyNote from './EmergencyNote';
 
 const WrenchGear = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -14,8 +17,9 @@ export default function Footer() {
 
       {/* Brand header */}
       <div className="footer-brand">
-        <span className="footer-brand-name">Diamond RV Solutions</span>
-        <span className="footer-brand-tag">Mobile RV Repair · Central Arkansas</span>
+        <img src={SITE.logo} alt="" width="56" height="56" className="footer-brand-logo" loading="lazy" aria-hidden="true" />
+        <span className="footer-brand-name">{SITE.name}</span>
+        <span className="footer-brand-tag">{SITE.tagline}</span>
       </div>
 
       {/* Decorative divider */}
@@ -28,39 +32,43 @@ export default function Footer() {
       {/* Columns */}
       <div className="footer-inner">
         <div className="footer-col">
-          <h3>Contact</h3>
+          <h2>Contact</h2>
           <div className="footer-rows">
-            <a href="tel:+15015550199">(501) 555-0199 · call or text</a>
-            <a href="mailto:woody@woodysrv.example">woody@woodysrv.example</a>
-            <p>Beebe, AR · Central Arkansas</p>
+            <a href={SITE.phoneHref}>{SITE.phone} · call or text</a>
+            <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            <p>Headquartered in Beebe, AR</p>
           </div>
         </div>
 
         <div className="footer-col footer-col--center">
-          <h3>Navigate</h3>
+          <h2>Navigate</h2>
           <ul className="footer-nav-links" role="list">
             <li><Link to="/services">Services</Link></li>
             <li><Link to="/coverage">Coverage</Link></li>
             <li><Link to="/about">About</Link></li>
             <li><Link to="/contact">Contact</Link></li>
+            <li><Link to="/privacy">Privacy Policy</Link></li>
           </ul>
         </div>
 
         <div className="footer-col">
-          <h3>Hours</h3>
+          <h2>Hours</h2>
           <div className="footer-rows">
             <p>Mon – Fri</p>
             <p>9:00 am – 5:00 pm</p>
-            <p className="footer-closed">Closed weekends</p>
+            <EmergencyNote className="emergency-note--footer" />
           </div>
         </div>
       </div>
 
       {/* Fineprint */}
       <div className="footer-fineprint">
-        <span>© {year} Diamond RV Solutions · Beebe, AR</span>
+        <span>© {year} {SITE.name} · Beebe, AR</span>
         <span className="footer-fineprint-dot" aria-hidden="true">◆</span>
         <span>Independent · Not affiliated with any dealer or manufacturer</span>
+        <span className="footer-fineprint-dot" aria-hidden="true">◆</span>
+        <Link to="/privacy">Privacy</Link>
+        <button type="button" className="footer-linkbtn" onClick={clearConsent}>Cookie settings</button>
       </div>
 
     </footer>

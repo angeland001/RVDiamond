@@ -4,6 +4,9 @@ import SplitText from '../components/SplitText';
 import GlareHover from '../components/GlareHover';
 import ClickSpark from '../components/ClickSpark';
 import BannerCar from '../components/BannerCar';
+import EmergencyNote from '../components/EmergencyNote';
+import { usePageMeta } from '../hooks/usePageMeta';
+import { SITE } from '../config/site';
 
 
 const CheckIcon = () => (
@@ -26,9 +29,10 @@ export default function Home() {
   const scrollRoot   = useRef(null);
   const loaderRef    = useRef(null);
 
-  useEffect(() => {
-    document.title = "Diamond RV Solutions — On-Site RV Repair | Beebe, AR";
-  }, []);
+  usePageMeta(
+    'Stag: Mobile RV Tech — Mobile RV Repair in Central Arkansas',
+    'Certified mobile RV repair across central Arkansas. AC, plumbing, electrical, winterizing and pre-purchase inspections done on-site at your home, campground or storage lot.'
+  );
 
   // Video-scrub scroll animation — single 0.67 MB MP4 instead of 121 separate images
   useEffect(() => {
@@ -150,7 +154,10 @@ export default function Home() {
       window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('scroll', onScroll);
       document.body.classList.remove('canvas-loading');
-      video.src = '';
+      // Release the video without setting src='' (Firefox logs "Invalid URI" for empty src)
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
     };
   }, []);
 
@@ -175,16 +182,16 @@ export default function Home() {
             <div className="scroll-anim-overlay" aria-hidden="true" />
 
             <div className="scroll-anim-stage">
-              <span className="scroll-anim-eyebrow">Diamond RV Solutions · Beebe, AR</span>
-              <h1 className="scroll-anim-title display" aria-label="RV down? I fix it on-site.">
+              <span className="scroll-anim-eyebrow">{SITE.name} · Central Arkansas</span>
+              <h1 className="scroll-anim-title display" aria-label="RV down? We fix it on-site.">
                 <SplitText text="RV down?" delay={120} duration={1.4} startIndex={0} />
                 {' '}
                 <span className="accent" aria-hidden="true">
-                  <SplitText text="I fix it on-site." delay={120} duration={1.4} startIndex={7} />
+                  <SplitText text="We fix it on-site." delay={120} duration={1.4} startIndex={7} />
                 </span>
               </h1>
-              <p className="scroll-anim-sub" aria-label="One call. Same tech. Same day. No tow.">
-                <SplitText text="One call. Same tech. Same day. No tow." delay={120} duration={1.4} />
+              <p className="scroll-anim-sub" aria-label="One call. Certified techs. Same day. No tow.">
+                <SplitText text="One call. Certified techs. Same day. No tow." delay={120} duration={1.4} />
               </p>
             </div>
 
@@ -205,12 +212,12 @@ export default function Home() {
             <span className="eyebrow">Beebe, Arkansas · Mobile Service</span>
             <h2 className="hero-headline display">
               Your RV <span className="underline-mark">won't fix itself.</span><br />
-              <span className="accent-text">I come to you.</span>
+              <span className="accent-text">We come to you.</span>
             </h2>
             <p className="hero-sub">
-              Hi, I'm Woody. RV-certified mobile technician based in Beebe, working
-              on-site at homes, campgrounds, storage lots and roadside breakdowns
-              within an hour of central Arkansas.
+              Stag: Mobile RV Tech sends certified RV technicians and fully equipped
+              service trucks to you — at home, the campground, the storage lot or the
+              roadside — anywhere within an hour of central Arkansas.
             </p>
             <ul className="hero-bullets" aria-label="Certifications and highlights">
               <li><CheckIcon />RVTAA Certified</li>
@@ -220,7 +227,7 @@ export default function Home() {
             </ul>
             <div className="hero-cta-row">
               <ClickSpark sparkColor="#f1e7d1" sparkCount={8} sparkRadius={22} sparkSize={7} duration={420}>
-                <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody for a quote">
+                <a className="btn btn-primary" href={SITE.phoneHref} aria-label={`Call ${SITE.name} for a quote`}>
                   <PhoneIcon />Call for a quote
                 </a>
               </ClickSpark>
@@ -240,7 +247,7 @@ export default function Home() {
           >
             <img
               src="/assets/images/Woody_Repairing_RV.png"
-              alt="Woody repairing an RV on-site"
+              alt="Stag: Mobile RV Tech technician repairing an RV on-site"
               className="hero-photo-img"
               loading="eager"
             />
@@ -252,22 +259,6 @@ export default function Home() {
           </GlareHover>
         </div>
       </section>
-
-      {/* ── Free Service Call promo ── */}
-      <div className="promo-wrap">
-        <div className="promo-banner" role="region" aria-label="Special offer">
-          <span className="promo-tag" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          </span>
-          <div className="promo-text">
-            <span className="promo-headline">Free Service Call Fee</span>
-            <span className="promo-disclaimer">* when a repair is performed</span>
-          </div>
-          
-        </div>
-      </div>
 
       {/* ── Marquee ── */}
       <div className="marquee-strip" aria-hidden="true" role="presentation">
@@ -281,9 +272,10 @@ export default function Home() {
       {/* ── CTA strip ── */}
       <section className="cta-strip" aria-labelledby="cta-home">
         <h2 id="cta-home">Rig acting up? Let's get it handled.</h2>
-        <p className="cta-sub">Mon–Fri · 9 am – 5 pm</p>
-        <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
-          <PhoneIcon />(501) 555-0199
+        <p className="cta-sub">{SITE.hours}</p>
+        <EmergencyNote className="emergency-note--cta" />
+        <a className="btn btn-primary" href={SITE.phoneHref} aria-label={`Call ${SITE.name} at ${SITE.phone}`}>
+          <PhoneIcon />{SITE.phone}
         </a>
         <BannerCar />
       </section>

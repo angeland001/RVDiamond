@@ -33,11 +33,13 @@ export default function PasswordGate({ children }) {
         style={{ ...styles.card, animation: shaking ? 'shake 0.5s ease' : 'none' }}
       >
         <div style={styles.badge}>PREVIEW</div>
-        <h1 style={styles.title}>Woody's Mobile RV Tech</h1>
+        <h1 style={styles.title}>Stag: Mobile RV Tech</h1>
         <p style={styles.sub}>Enter the preview password to continue.</p>
 
         <div style={styles.inputWrap}>
+          <label htmlFor="preview-password" style={styles.srOnly}>Preview password</label>
           <input
+            id="preview-password"
             type={visible ? 'text' : 'password'}
             value={input}
             onChange={e => { setInput(e.target.value); setError(false); }}
@@ -65,7 +67,7 @@ export default function PasswordGate({ children }) {
             )}
           </button>
         </div>
-        {error && <p style={styles.errorMsg}>Incorrect password — try again.</p>}
+        {error && <p role="alert" style={styles.errorMsg}>Incorrect password — try again.</p>}
 
         <button type="submit" style={styles.btn}>Enter Site</button>
       </form>
@@ -84,6 +86,10 @@ export default function PasswordGate({ children }) {
 }
 
 const styles = {
+  srOnly: {
+    position: 'absolute', width: 1, height: 1, padding: 0, margin: -1,
+    overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0,
+  },
   overlay: {
     position: 'fixed',
     inset: 0,

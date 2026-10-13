@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
 import { useReveal } from '../hooks/useReveal';
 import CountUp from '../components/CountUp';
 import BlurText from '../components/BlurText';
 import GlareHover from '../components/GlareHover';
 import BannerCar from '../components/BannerCar';
+import EmergencyNote from '../components/EmergencyNote';
+import { usePageMeta } from '../hooks/usePageMeta';
+import { SITE } from '../config/site';
 
 const CheckIcon = () => (
   <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -12,9 +14,10 @@ const CheckIcon = () => (
 );
 
 export default function About() {
-  useEffect(() => {
-    document.title = "About — Diamond RV Solutions | Beebe, AR";
-  }, []);
+  usePageMeta(
+    'About — Stag: Mobile RV Tech | Central Arkansas',
+    'Since 2014, Stag: Mobile RV Tech has brought certified, insured RV technicians to RV owners across central Arkansas.'
+  );
 
   const photoRef = useReveal();
   const copyRef  = useReveal();
@@ -35,7 +38,7 @@ export default function About() {
             >
               <img
                 src="/assets/images/Woody_with_wife.JPEG"
-                alt="Woody and his wife"
+                alt="The people behind Stag: Mobile RV Tech"
                 className="about-photo-img"
                 loading="lazy"
               />
@@ -46,7 +49,7 @@ export default function About() {
             <span className="eyebrow">About</span>
             <h1 id="about-heading">
               <BlurText
-                text="Twelve years under rigs. One guy on the truck."
+                text="Twelve years under rigs. Built for the long haul."
                 animateBy="words"
                 delay={70}
                 stepDuration={0.4}
@@ -54,15 +57,14 @@ export default function About() {
               />
             </h1>
             <p>
-              Camping and traveling have been part of my life for as long as I can remember.
-              That time on the road gave me a firsthand understanding of what it feels like
-              when something goes wrong far from home — and a genuine passion for helping
-              people through it.
+              Camping and traveling have been part of who we are from day one. Time on the
+              road taught us exactly what it feels like when something goes wrong far from
+              home — and gave us a genuine drive to help people through it.
             </p>
             <p>
-              I started Diamond RV Solutions to make the rough moments smooth. Every job gets
-              real attention to what you need and the skills to back it up — no runaround,
-              no guesswork, just the work done right.
+              Stag: Mobile RV Tech exists to make the rough moments smooth. Every job gets a
+              certified technician, real attention to what you need and the skills to back it
+              up — no runaround, no guesswork, just the work done right.
             </p>
 
             <div className="about-stats" aria-label="At-a-glance stats">
@@ -70,7 +72,7 @@ export default function About() {
                 <span className="stat-num display">
                   <CountUp to={12} from={0} duration={2} delay={0.2} />+
                 </span>
-                <span className="stat-label">Years wrenching</span>
+                <span className="stat-label">Years in service</span>
               </div>
               <div className="stat">
                 <span className="stat-num display">
@@ -96,13 +98,14 @@ export default function About() {
       </section>
 
       <section className="cta-strip" aria-labelledby="cta-about">
-        <h2 id="cta-about">Want Woody on the job? Pick up the phone.</h2>
-        <p className="cta-sub">Mon–Fri · 9 am – 5 pm</p>
-        <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
+        <h2 id="cta-about">Need a certified tech? Pick up the phone.</h2>
+        <p className="cta-sub">{SITE.hours}</p>
+        <EmergencyNote className="emergency-note--cta" />
+        <a className="btn btn-primary" href={SITE.phoneHref} aria-label={`Call ${SITE.name} at ${SITE.phone}`}>
           <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
             <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />
           </svg>
-          (501) 555-0199
+          {SITE.phone}
         </a>
         <BannerCar />
       </section>

@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
 import BannerCar from '../components/BannerCar';
+import EmergencyNote from '../components/EmergencyNote';
+import { usePageMeta } from '../hooks/usePageMeta';
+import { SITE } from '../config/site';
 
 const SERVICES = [
   {
@@ -161,7 +162,7 @@ const SERVICES = [
         <path d="M8 10h8M8 14h8M8 18h5" strokeLinecap="round" />
       </svg>
     ),
-    title: 'Roof Inspection',
+    title: 'Pre-Purchase Inspection',
     desc: 'Independent eyes before you sign. Written report covering structure, systems and safety.',
     items: ['Roof, seals, slides', 'All major systems', 'Safety & propane', 'Photos + written report'],
     illus: (
@@ -196,9 +197,10 @@ function ServiceCard({ num, icon, title, desc, items, illus }) {
 }
 
 export default function Services() {
-  useEffect(() => {
-    document.title = "Services — Diamond RV Solutions | Beebe, AR";
-  }, []);
+  usePageMeta(
+    'RV Repair Services — Stag: Mobile RV Tech | Central Arkansas',
+    'Mobile RV AC service, plumbing, electrical repair, winterizing, de-winterizing and pre-purchase inspections across central Arkansas.'
+  );
 
   const headRef = useReveal();
 
@@ -207,21 +209,9 @@ export default function Services() {
       <section className="section" aria-labelledby="services-heading">
         <div className="services-intro">
           <div className="section-head reveal" ref={headRef}>
-            <span className="eyebrow">What I fix</span>
+            <span className="eyebrow">What we fix</span>
             <h1 id="services-heading">Six things, done right.</h1>
-            <p>I'm not a generalist with a tool belt. Every job below is something I do weekly, with the parts and diagnostic gear on the truck to finish in one visit.</p>
-          </div>
-        </div>
-
-        <div className="promo-banner" role="region" aria-label="Special offer">
-          <span className="promo-tag" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          </span>
-          <div className="promo-text">
-            <span className="promo-headline">Free Service Call Fee</span>
-            <span className="promo-disclaimer">* when a repair is performed</span>
+            <p>We're not generalists with a tool belt. Every service below is something our technicians handle every week, with the parts and diagnostic gear on the truck to finish in one visit.</p>
           </div>
         </div>
 
@@ -233,7 +223,7 @@ export default function Services() {
             <span className="qb-label">Free Quote</span>
             <span className="qb-desc">Call or text for a same-day estimate — no surprises, no obligations.</span>
           </div>
-          <a className="btn btn-primary qb-cta" href="tel:+15015550199" aria-label="Call for a free quote">Call Now</a>
+          <a className="btn btn-primary qb-cta" href={SITE.phoneHref} aria-label="Call for a free quote">Call Now</a>
         </div>
 
         <div className="services-grid">
@@ -243,12 +233,13 @@ export default function Services() {
 
       <section className="cta-strip" aria-labelledby="cta-services">
         <h2 id="cta-services">Got one of these? Let's get it handled.</h2>
-        <p className="cta-sub">Mon–Fri · 9 am – 5 pm</p>
-        <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
+        <p className="cta-sub">{SITE.hours}</p>
+        <EmergencyNote className="emergency-note--cta" />
+        <a className="btn btn-primary" href={SITE.phoneHref} aria-label={`Call ${SITE.name} at ${SITE.phone}`}>
           <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
             <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />
           </svg>
-          (501) 555-0199
+          {SITE.phone}
         </a>
         <BannerCar />
       </section>

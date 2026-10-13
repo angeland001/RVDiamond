@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { SITE } from '../config/site';
 
 const LINKS = [
   { to: '/services',  label: 'Services'  },
@@ -41,16 +42,18 @@ export default function Nav() {
     <>
       <header className="nav" role="banner">
         <div className="nav-inner">
-          <Link className="wordmark" to="/" aria-label="Diamond RV Solutions — home">
+          <Link className="wordmark" to="/" aria-label={`${SITE.name} — home`}>
             <img
-              src="/assets/logo/Diamond_Logo.png"
+              src={SITE.logo}
               alt=""
+              width="44"
+              height="44"
               className="wordmark-badge-img"
               aria-hidden="true"
             />
             <span className="wordmark-text">
-              <span className="name">DIAMOND RV SOLUTIONS</span>
-              <span className="sub">Mobile RV Tech · Est. '14</span>
+              <span className="name">STAG</span>
+              <span className="sub">Mobile RV Tech<span className="sub-est"> · Est. '14</span></span>
             </span>
           </Link>
 
@@ -69,11 +72,11 @@ export default function Nav() {
           </ul>
 
           <div className="nav-right">
-            <a className="nav-call" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
+            <a className="nav-call" href={SITE.phoneHref} aria-label={`Call ${SITE.name} at ${SITE.phone}`}>
               <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
                 <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />
               </svg>
-              <span className="nav-call-number">(501) 555-0199</span>
+              <span className="nav-call-number">{SITE.phone}</span>
             </a>
             <button
               className="nav-toggle"
@@ -83,10 +86,10 @@ export default function Nav() {
               aria-label={open ? 'Close menu' : 'Open menu'}
               onClick={toggle}
             >
-              <svg className="icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg className="icon-open" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M3 6h18M3 12h18M3 18h18" />
               </svg>
-              <svg className="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg className="icon-close" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M6 6l12 12M18 6 6 18" />
               </svg>
             </button>
@@ -105,7 +108,7 @@ export default function Nav() {
             {label}
           </Link>
         ))}
-        <div className="nav-drawer-tagline">Diamond RV Solutions · Beebe, AR · Est. '14</div>
+        <div className="nav-drawer-tagline">{SITE.name} · Central Arkansas · Est. '14</div>
       </nav>
     </>
   );

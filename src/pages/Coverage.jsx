@@ -1,6 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useReveal } from '../hooks/useReveal';
 import BannerCar from '../components/BannerCar';
+import EmergencyNote from '../components/EmergencyNote';
+import { usePageMeta } from '../hooks/usePageMeta';
+import { SITE } from '../config/site';
+import { getConsent, setConsent, onConsentChange } from '../lib/consent';
 
 const HQ = { lat: 35.0723, lng: -91.8837 };
 
@@ -41,7 +45,7 @@ const MAP_STYLES = [
 const HQ_PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="50" viewBox="0 0 38 50" style="display:block">
   <path d="M19 2C9.6 2 2 9.6 2 19c0 13.5 17 29 17 29s17-15.5 17-29C36 9.6 28.4 2 19 2z" fill="#b14a1f" stroke="#8a3614" stroke-width="2"/>
   <circle cx="19" cy="19" r="10" fill="#8a3614"/>
-  <text x="19" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#f1e7d1">W</text>
+  <text x="19" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#f1e7d1">S</text>
 </svg>`;
 
 const TOWN_PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="30" viewBox="0 0 22 30" style="display:block">
@@ -69,9 +73,9 @@ function iwTemplate(title, body) {
     <p class="mw-eyebrow">Service Area</p>
     <h3 class="mw-title">${title}</h3>
     ${body}
-    <a class="mw-cta" href="tel:+15015550199">
+    <a class="mw-cta" href="${SITE.phoneHref}">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
-      Call Woody
+      Call Stag
     </a>
   </div>`;
 }
@@ -84,41 +88,58 @@ export default function Coverage() {
   const townsRef = useReveal();
   const areaRef  = useReveal();
 
-  useEffect(() => {
-    document.title = "Coverage — Diamond RV Solutions | Beebe, AR";
-  }, []);
+  usePageMeta(
+    'Service Area — Stag: Mobile RV Tech | Beebe, Cabot, Little Rock & More',
+    'Mobile RV repair within an hour of Beebe, AR: Cabot, Searcy, Jacksonville, Little Rock, North Little Rock, Lonoke, Vilonia and Ward.'
+  );
+
+  // Google Maps can set third-party cookies, so it only loads after consent.
+  const [mapsAllowed, setMapsAllowed] = useState(() => getConsent() === 'all');
+  useEffect(() => onConsentChange(v => setMapsAllowed(v === 'all')), []);
+  const [mapError, setMapError] = useState(false);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_MAPS_API_KEY || '';
+    if (!mapsAllowed) return;
+    const apiKey = SITE.mapsApiKey;
     if (!apiKey) {
-      console.warn('[Coverage] Add VITE_MAPS_API_KEY to your .env file');
+      console.warn('[Coverage] Set mapsApiKey in src/config/site.js');
+      setMapError(true);
       return;
     }
 
+    // Google calls this when the API key rejects the page (e.g. RefererNotAllowedMapError).
+    window.gm_authFailure = () => setMapError(true);
+
     window.initCoverageMap = function () {
       const el = mapRef.current;
-      if (!el || !window.google) return;
+      // StrictMode runs effects twice on the same DOM node; a second Map on the
+      // same div breaks the first one's internal observers.
+      if (!el || !window.google || el.dataset.mapInit) return;
+      el.dataset.mapInit = '1';
 
-      const s = document.createElement('style');
-      s.textContent = `
-        .gm-style-iw-c{background:#1f1610!important;border:1px solid rgba(241,231,209,.2)!important;border-radius:4px!important;padding:0!important;box-shadow:0 8px 32px rgba(0,0,0,.65)!important}
-        .gm-style-iw-d{overflow:hidden!important;padding:0!important}
-        .gm-style-iw-chr{background:#1f1610!important;border-bottom:1px solid rgba(241,231,209,.1)!important;padding:6px 6px 0!important}
-        .gm-ui-hover-effect>span{background:#f1e7d1!important}
-        .gm-style-iw-t::after{background:linear-gradient(45deg,#1f1610 50%,transparent 51%)!important}
-        .gm-style .gm-style-iw-tc::after{background:#1f1610!important}
-        .mw-wrap{padding:14px 16px 16px;min-width:190px;font-family:'JetBrains Mono',monospace}
-        .mw-eyebrow{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#d96a35;margin:0 0 3px}
-        .mw-title{font-family:'Alfa Slab One',serif;font-size:17px;color:#f1e7d1;margin:0 0 10px;line-height:1.15}
-        .mw-stats{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-        .mw-stat{flex:1}
-        .mw-divider{width:1px;height:34px;background:rgba(241,231,209,.15);flex-shrink:0}
-        .mw-value{font-size:14px;font-weight:700;color:#f1e7d1;white-space:nowrap}
-        .mw-unit{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#b08a5b;margin-top:2px}
-        .mw-cta{display:flex;align-items:center;gap:7px;justify-content:center;background:#b14a1f;color:#f1e7d1;text-decoration:none;padding:9px 14px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .1s}
-        .mw-cta:hover{background:#d96a35}
-      `;
-      document.head.appendChild(s);
+      if (!document.getElementById('coverage-map-styles')) {
+        const s = document.createElement('style');
+        s.id = 'coverage-map-styles';
+        s.textContent = `
+          .gm-style-iw-c{background:#1f1610!important;border:1px solid rgba(241,231,209,.2)!important;border-radius:4px!important;padding:0!important;box-shadow:0 8px 32px rgba(0,0,0,.65)!important}
+          .gm-style-iw-d{overflow:hidden!important;padding:0!important}
+          .gm-style-iw-chr{background:#1f1610!important;border-bottom:1px solid rgba(241,231,209,.1)!important;padding:6px 6px 0!important}
+          .gm-ui-hover-effect>span{background:#f1e7d1!important}
+          .gm-style-iw-t::after{background:linear-gradient(45deg,#1f1610 50%,transparent 51%)!important}
+          .gm-style .gm-style-iw-tc::after{background:#1f1610!important}
+          .mw-wrap{padding:14px 16px 16px;min-width:190px;font-family:'JetBrains Mono',monospace}
+          .mw-eyebrow{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#d96a35;margin:0 0 3px}
+          .mw-title{font-family:'Alfa Slab One',serif;font-size:17px;color:#f1e7d1;margin:0 0 10px;line-height:1.15}
+          .mw-stats{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+          .mw-stat{flex:1}
+          .mw-divider{width:1px;height:34px;background:rgba(241,231,209,.15);flex-shrink:0}
+          .mw-value{font-size:14px;font-weight:700;color:#f1e7d1;white-space:nowrap}
+          .mw-unit{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#b08a5b;margin-top:2px}
+          .mw-cta{display:flex;align-items:center;gap:7px;justify-content:center;background:#b14a1f;color:#f1e7d1;text-decoration:none;padding:9px 14px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .1s}
+          .mw-cta:hover{background:#d96a35}
+        `;
+        document.head.appendChild(s);
+      }
 
       class MapPin extends google.maps.OverlayView {
         constructor({ position, svg, anchorX, anchorY, zIndex = 1, onClick }) {
@@ -154,8 +175,20 @@ export default function Coverage() {
         fullscreenControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
       });
 
-      map.data.loadGeoJson('https://raw.githubusercontent.com/glynnbird/usstatesgeojson/master/arkansas.geojson');
-      map.data.setStyle({ fillColor: '#b14a1f', fillOpacity: 0.10, strokeColor: '#d96a35', strokeWeight: 1.5, strokeOpacity: 0.45, clickable: false });
+      // State outline: self-hosted and drawn as a plain Polygon (the Data layer's
+      // GeoJSON parser rejects this ring with "first and last positions are not equal").
+      fetch('/assets/data/arkansas.geojson')
+        .then(r => r.json())
+        .then(({ geometry }) => {
+          new google.maps.Polygon({
+            map,
+            paths: geometry.coordinates.map(ring => ring.map(([lng, lat]) => ({ lat, lng }))),
+            fillColor: '#b14a1f', fillOpacity: 0.10,
+            strokeColor: '#d96a35', strokeWeight: 1.5, strokeOpacity: 0.45,
+            clickable: false,
+          });
+        })
+        .catch(() => { /* outline is decorative — map still works without it */ });
 
       const iw = new google.maps.InfoWindow({ maxWidth: 280 });
       const bounds = new google.maps.LatLngBounds();
@@ -170,7 +203,7 @@ export default function Coverage() {
       new MapPin({
         position: HQ, svg: HQ_PIN_SVG, anchorX: 19, anchorY: 50, zIndex: 10,
         onClick: () => {
-          iw.setContent(iwTemplate('Beebe, AR &mdash; HQ', `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value" style="color:#d96a35">Home base</div><div class="mw-unit">Mobile RV Tech · Est. '14</div></div></div>`));
+          iw.setContent(iwTemplate('Beebe, AR &mdash; HQ', `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value" style="color:#d96a35">Headquarters</div><div class="mw-unit">Mobile RV Tech · Est. '14</div></div></div>`));
           iw.setPosition(HQ); iw.open(map); dismissHint();
         },
       }).setMap(map);
@@ -217,7 +250,7 @@ export default function Coverage() {
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initCoverageMap&loading=async`;
     script.async = true;
     document.head.appendChild(script);
-  }, []);
+  }, [mapsAllowed]);
 
   const headReveal  = useReveal();
   const townsReveal = useReveal();
@@ -229,9 +262,9 @@ export default function Coverage() {
         <div className="area-inner">
           <div>
             <div className="section-head reveal" ref={headReveal}>
-              <span className="eyebrow">Where I roll</span>
+              <span className="eyebrow">Where we roll</span>
               <h1 id="area-heading">One hour of Beebe.</h1>
-              <p>I run a tight radius so I can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
+              <p>We keep a tight service radius so our techs can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
             </div>
             <ul className="area-towns reveal" ref={townsReveal} aria-label="Towns served">
               <li className="home-town">Beebe · HQ</li>
@@ -248,8 +281,21 @@ export default function Coverage() {
           </div>
 
           <div className="area-map reveal" ref={areaReveal} role="region" aria-label="Interactive service area map — click any town to see drive time from Beebe">
-            <div id="coverage-map" ref={mapRef}></div>
-            <div id="map-hint" className="map-hint" ref={hintRef} aria-hidden="true">
+            <div id="coverage-map" ref={mapRef} hidden={mapError}></div>
+            {mapsAllowed && mapError && (
+              <div className="map-consent" role="status">
+                <p>The interactive map couldn't load right now. We serve every town listed here — call {SITE.phone} to confirm your location.</p>
+              </div>
+            )}
+            {!mapsAllowed && (
+              <div className="map-consent">
+                <p>The interactive map is provided by Google Maps, which may set cookies.</p>
+                <button type="button" className="btn btn-primary" onClick={() => setConsent('all')}>
+                  Allow &amp; load map
+                </button>
+              </div>
+            )}
+            <div id="map-hint" className="map-hint" ref={hintRef} aria-hidden="true" hidden={!mapsAllowed || mapError}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
                 <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z" />
                 <circle cx="12" cy="9" r="2.5" fill="currentColor" stroke="none" />
@@ -262,12 +308,13 @@ export default function Coverage() {
 
       <section className="cta-strip" aria-labelledby="cta-coverage">
         <h2 id="cta-coverage">On the map? Let's set up a call.</h2>
-        <p className="cta-sub">Mon–Fri · 9 am – 5 pm</p>
-        <a className="btn btn-primary" href="tel:+15015550199" aria-label="Call Woody at (501) 555-0199">
+        <p className="cta-sub">{SITE.hours}</p>
+        <EmergencyNote className="emergency-note--cta" />
+        <a className="btn btn-primary" href={SITE.phoneHref} aria-label={`Call ${SITE.name} at ${SITE.phone}`}>
           <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round">
             <path d="M5 4h3l2 5-2.5 1.5a11 11 0 0 0 6 6L15 14l5 2v3a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z" />
           </svg>
-          (501) 555-0199
+          {SITE.phone}
         </a>
         <BannerCar />
       </section>
