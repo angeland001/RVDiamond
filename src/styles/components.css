@@ -40,60 +40,71 @@
 .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* ════════════════════════ NAVIGATION ════════════════════════ */
+/* The nav is fixed and morphs from the full horizontal banner (tall) into a
+   compact bar as --nav-p (set by Nav.jsx on scroll) goes 0 → 1. A static
+   spacer reserves the tall height so the page never shifts during the morph. */
 .nav {
-  position: sticky;
-  top: 0;
+  --nav-p: 0;
+  --mark-h-tall: 84px;  --mark-h-short: 46px;
+  --name-h-tall: 40px;  --name-h-short: 22px;
+  --sub-h-tall:  12px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
   z-index: 40;
   background: var(--ink);
   color: var(--cream);
   border-bottom: 3px solid var(--accent);
+  box-shadow: 0 6px 18px rgba(31, 22, 16, calc(var(--nav-p) * .28));
 }
+.nav-spacer { height: calc(var(--nav-h-tall) + 3px); }
 .nav-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 16px;
+  padding: 0 16px;
   max-width: var(--container);
   margin: 0 auto;
-  min-height: var(--nav-h);
+  height: calc(var(--nav-h-tall) - (var(--nav-h-tall) - var(--nav-h)) * var(--nav-p));
 }
 .wordmark {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: calc(12px - 4px * var(--nav-p));
   text-decoration: none;
   color: var(--cream);
+  min-width: 0;
+  border-radius: var(--radius-sm);
 }
-.wordmark-badge-img {
-  height: 44px;
-  width: 44px;
-  border-radius: 50%;
-  object-fit: contain;
-  display: block;
+.wordmark img { display: block; width: auto; max-width: none; }
+.wordmark-mark {
+  height: calc(var(--mark-h-tall) - (var(--mark-h-tall) - var(--mark-h-short)) * var(--nav-p));
+  aspect-ratio: 701 / 563;
   flex-shrink: 0;
+  transition: transform var(--t-med) var(--ease-spring);
 }
+.wordmark:hover .wordmark-mark { transform: rotate(-4deg) translateY(-1px); }
 .wordmark-text {
   display: flex;
   flex-direction: column;
-  line-height: 1;
+  justify-content: center;
 }
-.wordmark-text .name {
-  font-family: var(--font-display);
-  font-size: 16px;
-  letter-spacing: .01em;
+.wordmark-name {
+  height: calc(var(--name-h-tall) - (var(--name-h-tall) - var(--name-h-short)) * var(--nav-p));
+  aspect-ratio: 1211 / 204;
 }
-.wordmark-text .sub {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--cream-2);
-  margin-top: 4px;
-  white-space: nowrap;
+/* Subtitle folds away in the first ~60% of the morph */
+.wordmark-sub {
+  height: calc(var(--sub-h-tall) * (1 - var(--nav-p)));
+  aspect-ratio: 1201 / 72;
+  margin-top: calc(7px * (1 - var(--nav-p)));
+  opacity: calc(1 - var(--nav-p) * 1.7);
 }
-@media (max-width: 420px) {
-  .wordmark-text .sub-est { display: none; }
+@media (max-width: 859px) {
+  .nav { --mark-h-tall: 60px; --mark-h-short: 42px; --name-h-tall: 26px; --name-h-short: 19px; --sub-h-tall: 8px; }
+}
+@media (max-width: 380px) {
+  .nav { --mark-h-tall: 50px; --mark-h-short: 38px; --name-h-tall: 19px; --name-h-short: 16px; --sub-h-tall: 6px; }
 }
 
 /* Nav links */
@@ -189,7 +200,7 @@
   inset: 0;
   background: var(--ink);
   z-index: 39;
-  padding: calc(var(--nav-h) + 16px) 24px 24px;
+  padding: calc(var(--nav-h-tall) + 16px) 24px 24px;
   transform: translateY(-100%);
   transition: transform var(--t-med) var(--ease-out);
   visibility: hidden;

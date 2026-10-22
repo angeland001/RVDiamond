@@ -16,6 +16,12 @@ export const SITE = {
   emergencyFee: '$250',
   logo:       '/assets/logo/stag-badge-128.webp',
   logoFull:   '/assets/logo/stag-emblem-600.png',
+  // Horizontal banner split into pieces (cream/rust on transparent) so the nav can morph it.
+  brand: {
+    mark: '/assets/logo/stag-mark.webp',   // 701×563
+    name: '/assets/logo/stag-name.webp',   // 1211×204
+    sub:  '/assets/logo/stag-sub.webp',    // 1201×72
+  },
   url:        '', // e.g. 'https://www.yourdomain.com' — falls back to the current origin
 
   // Google Maps browser key. Public by design (Google's map script runs in the

@@ -45,5 +45,9 @@
 
   /* Layout */
   --container:    1180px;
-  --nav-h:        64px;
+  --nav-h:        64px;   /* condensed nav */
+  --nav-h-tall:   104px;  /* nav at top of page (full banner) */
+}
+@media (max-width: 859px) {
+  :root { --nav-h-tall: 76px; }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { SITE } from '../config/site';
 
@@ -38,22 +38,44 @@ export default function Nav() {
 
   useEffect(() => { close(); }, [pathname]);
 
+  // Scroll-linked morph: --nav-p goes 0 → 1 over the first MORPH_PX of scroll,
+  // shrinking the full banner lockup into the compact bar. Reduced motion snaps.
+  const navRef = useRef(null);
+  useEffect(() => {
+    const MORPH_PX = 120;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let frame = 0;
+    function update() {
+      frame = 0;
+      const y = Math.max(0, window.scrollY);
+      const p = reduce.matches ? (y > MORPH_PX / 2 ? 1 : 0) : Math.min(1, y / MORPH_PX);
+      navRef.current?.style.setProperty('--nav-p', p.toFixed(3));
+    }
+    function onScroll() { if (!frame) frame = requestAnimationFrame(update); }
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
     <>
-      <header className="nav" role="banner">
+      <header className="nav" role="banner" ref={navRef}>
         <div className="nav-inner">
           <Link className="wordmark" to="/" aria-label={`${SITE.name} — home`}>
             <img
-              src={SITE.logo}
+              src={SITE.brand.mark}
               alt=""
-              width="44"
-              height="44"
-              className="wordmark-badge-img"
-              aria-hidden="true"
+              width="701"
+              height="563"
+              className="wordmark-mark"
+              fetchpriority="high"
             />
             <span className="wordmark-text">
-              <span className="name">STAG</span>
-              <span className="sub">Mobile RV Tech<span className="sub-est"> · Est. '14</span></span>
+              <img src={SITE.brand.name} alt="" width="1211" height="204" className="wordmark-name" />
+              <img src={SITE.brand.sub}  alt="" width="1201" height="72"  className="wordmark-sub" />
             </span>
           </Link>
 
@@ -96,6 +118,7 @@ export default function Nav() {
           </div>
         </div>
       </header>
+      <div className="nav-spacer" aria-hidden="true" />
 
       <nav id="nav-drawer" className="nav-drawer" data-open={String(open)} aria-label="Mobile menu">
         {LINKS.map(({ to, label }) => (
