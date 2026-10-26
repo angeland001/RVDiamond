@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { SITE } from '../config/site';
 import { clearConsent } from '../lib/consent';
 import EmergencyNote from './EmergencyNote';
+import EmailLink from './EmailLink';
 
 const WrenchGear = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -35,7 +36,7 @@ export default function Footer() {
           <h2>Contact</h2>
           <div className="footer-rows">
             <a href={SITE.phoneHref}>{SITE.phone} · call or text</a>
-            <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            <EmailLink />
             <p>Headquartered in Beebe, AR</p>
           </div>
         </div>

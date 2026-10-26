@@ -13,7 +13,6 @@ export default function StructuredData() {
       logo: origin + SITE.logoFull,
       image: origin + '/og-image.jpg',
       telephone: '+1-501-555-0199',
-      email: SITE.email,
       foundingDate: String(SITE.founded),
       address: { '@type': 'PostalAddress', addressLocality: SITE.city, addressRegion: SITE.region, addressCountry: 'US' },
       areaServed: ['Beebe', 'Cabot', 'Jacksonville', 'Little Rock', 'Lonoke', 'North Little Rock', 'Searcy', 'Vilonia', 'Ward']

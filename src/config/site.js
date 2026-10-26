@@ -1,6 +1,5 @@
 // Single source of truth for business details used across the site.
 // Everything here ships to the browser — never put secrets in this file.
-// TODO before launch: replace EMAIL and set URL to the live domain.
 export const SITE = {
   name:       'Stag: Mobile RV Tech',
   shortName:  'Stag',
@@ -9,7 +8,9 @@ export const SITE = {
   phone:      '(501) 555-0199',
   phoneHref:  'tel:+15015550199',
   smsHref:    'sms:+15015550199',
-  email:      'service@stagrvtech.example',
+  // Stored in two parts so scrapers can't regex the full address; render it with <EmailLink />.
+  emailUser:   'Staffinfo',
+  emailDomain: 'stagmobilervtech.com',
   city:       'Beebe',
   region:     'AR',
   hours:      'Mon – Fri · 9 am – 5 pm',
@@ -22,7 +23,7 @@ export const SITE = {
     name: '/assets/logo/stag-name.webp',   // 1211×204
     sub:  '/assets/logo/stag-sub.webp',    // 1201×72
   },
-  url:        '', // e.g. 'https://www.yourdomain.com' — falls back to the current origin
+  url:        'https://www.stagmobilervtech.com', // canonical origin for meta tags and structured data
 
   // Google Maps browser key. Public by design (Google's map script runs in the
   // browser); it's protected by the key's restrictions in Google Cloud Console:

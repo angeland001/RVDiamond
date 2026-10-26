@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
 import { usePageMeta } from '../hooks/usePageMeta';
 import EmergencyNote from '../components/EmergencyNote';
+import EmailLink from '../components/EmailLink';
 import { SITE } from '../config/site';
 
 export default function Contact() {
@@ -71,7 +72,7 @@ export default function Contact() {
             </span>
             <div>
               <span className="label">Email</span>
-              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+              <EmailLink />
             </div>
           </div>
 

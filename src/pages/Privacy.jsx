@@ -1,6 +1,7 @@
 import { usePageMeta } from '../hooks/usePageMeta';
 import { clearConsent } from '../lib/consent';
 import { SITE } from '../config/site';
+import EmailLink from '../components/EmailLink';
 
 const EFFECTIVE_DATE = 'October 13, 2026';
 
@@ -47,7 +48,7 @@ export default function Privacy() {
           Marketing email is strictly opt-in and is never a condition of service. Every marketing
           email identifies us as the sender, includes our postal address, and contains a one-click
           unsubscribe link. Unsubscribe requests take effect immediately and are always honored.
-          You can also unsubscribe by emailing <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+          You can also unsubscribe by emailing <EmailLink />.
           Unsubscribing from marketing does not stop messages about a service request you made.
         </p>
 
@@ -83,7 +84,7 @@ export default function Privacy() {
         <h2>Your choices</h2>
         <p>
           You can ask us to access, correct or delete the personal information we hold about you by
-          emailing <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or calling{' '}
+          emailing <EmailLink /> or calling{' '}
           <a href={SITE.phoneHref}>{SITE.phone}</a>. We'll respond within a reasonable time.
         </p>
 
@@ -96,7 +97,7 @@ export default function Privacy() {
         <h2>Contact</h2>
         <p>
           {SITE.name} · {SITE.city}, {SITE.region}<br />
-          <a href={`mailto:${SITE.email}`}>{SITE.email}</a> · <a href={SITE.phoneHref}>{SITE.phone}</a>
+          <EmailLink /> · <a href={SITE.phoneHref}>{SITE.phone}</a>
         </p>
       </div>
     </section>
