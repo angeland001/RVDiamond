@@ -10,16 +10,16 @@ export default function CookieBanner() {
   if (choice) return null;
 
   return (
-    <section className="cookie-banner" role="region" aria-labelledby="cookie-title">
-      <div className="cookie-copy">
-        <h2 id="cookie-title" className="cookie-title">Cookies on this site</h2>
+    <section className="prefs-bar" role="region" aria-labelledby="prefs-title">
+      <div className="prefs-copy">
+        <h2 id="prefs-title" className="prefs-title">Cookies on this site</h2>
         <p>
           We use essential storage to run the site. With your OK, Google Maps loads on our
           Coverage page and may set cookies. We never sell your data.{' '}
           <Link to="/privacy">Privacy Policy</Link>
         </p>
       </div>
-      <div className="cookie-actions">
+      <div className="prefs-actions">
         <button type="button" className="btn btn-ghost" onClick={() => setConsent('essential')}>
           Essential only
         </button>
