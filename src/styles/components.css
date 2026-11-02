@@ -771,6 +771,39 @@
   z-index: 1;
 }
 .map-hint svg { color: var(--accent-glow); flex-shrink: 0; }
+.area-map-col { min-width: 0; }
+.map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  margin-top: 10px;
+  color: var(--cream);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.map-legend[hidden] { display: none; }
+.map-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.map-legend-swatch {
+  flex: none;
+  width: 16px;
+  height: 12px;
+}
+.map-legend-swatch--in {
+  background: rgba(173, 72, 30, .3);
+  border: 2px solid var(--accent-glow);
+}
+.map-legend-swatch--out { background: #45403b; }
+.map-legend-call {
+  color: var(--cream);
+  font-weight: 700;
+  text-underline-offset: 2px;
+}
 .area-towns {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -848,7 +881,7 @@
   margin: 20px 0 0;
   padding: 18px 0 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   align-items: end;
   border-top: 1px dashed var(--rule);

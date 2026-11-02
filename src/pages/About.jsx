@@ -1,5 +1,4 @@
 import { useReveal } from '../hooks/useReveal';
-import CountUp from '../components/CountUp';
 import BlurText from '../components/BlurText';
 import GlareHover from '../components/GlareHover';
 import BannerCar from '../components/BannerCar';
@@ -74,12 +73,6 @@ export default function About() {
               <div className="stat">
                 <span className="stat-num stat-num--word display">On-site</span>
                 <span className="stat-label">Repairs at your rig</span>
-              </div>
-              <div className="stat">
-                <span className="stat-num display">
-                  <CountUp to={60} from={0} duration={1.8} delay={0.1} /> mi
-                </span>
-                <span className="stat-label">Service radius</span>
               </div>
             </div>
 

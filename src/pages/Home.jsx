@@ -214,7 +214,7 @@ export default function Home() {
             <p className="hero-sub">
               Stag: Mobile RV Tech sends certified RV technicians and fully equipped
               service trucks to you — at home, the campground, the storage lot or the
-              roadside — anywhere within an hour of central Arkansas.
+              roadside — across our central Arkansas service area.
             </p>
             <ul className="hero-bullets" aria-label="Certifications and highlights">
               <li><CheckIcon />RVTAA Certified</li>

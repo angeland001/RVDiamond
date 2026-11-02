@@ -5,6 +5,9 @@ import EmergencyNote from '../components/EmergencyNote';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { SITE } from '../config/site';
 import { getConsent, setConsent, onConsentChange } from '../lib/consent';
+import { serviceAreaPath, clockwise } from '../lib/serviceArea';
+
+const SERVICE_AREA_BUFFER_MILES = 12; // how far the outline sits beyond the outermost towns
 
 const LOCATIONS = [
   { label: 'Beebe',             lat: 35.0723, lng: -91.8837 },
@@ -43,12 +46,12 @@ const MAP_STYLES = [
 
 const TOWN_PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="30" viewBox="0 0 22 30" style="display:block">
   <path d="M11 1C5.5 1 1 5.5 1 11c0 9 10 18 10 18S21 20 21 11C21 5.5 16.5 1 11 1z" fill="#e8dcc0" stroke="#b08a5b" stroke-width="1"/>
-  <circle cx="11" cy="11" r="4.5" fill="#b14a1f"/>
+  <circle cx="11" cy="11" r="4.5" fill="#ad481e"/>
 </svg>`;
 
-function iwTemplate(title, body) {
+function iwTemplate(title, body, eyebrow = 'Service Area') {
   return `<div class="mw-wrap">
-    <p class="mw-eyebrow">Service Area</p>
+    <p class="mw-eyebrow">${eyebrow}</p>
     <h3 class="mw-title">${title}</h3>
     ${body}
     <a class="mw-cta" href="${SITE.phoneHref}">
@@ -109,6 +112,7 @@ export default function Coverage() {
           .mw-stat{flex:1}
           .mw-value{font-size:14px;font-weight:700;color:#f1e7d1;white-space:nowrap}
           .mw-unit{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#b08a5b;margin-top:2px}
+          .mw-note{font-size:12px;line-height:1.5;color:#f1e7d1;margin:0 0 12px}
           .mw-cta{display:flex;align-items:center;gap:7px;justify-content:center;background:#ad481e;color:#f1e7d1;text-decoration:none;padding:9px 14px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .1s}
           .mw-cta:hover{background:#d96a35}
         `;
@@ -149,24 +153,51 @@ export default function Coverage() {
         fullscreenControlOptions: { position: google.maps.ControlPosition.RIGHT_BOTTOM },
       });
 
-      // State outline: self-hosted and drawn as a plain Polygon (the Data layer's
-      // GeoJSON parser rejects this ring with "first and last positions are not equal").
-      fetch('/assets/data/arkansas.geojson')
-        .then(r => r.json())
-        .then(({ geometry }) => {
-          new google.maps.Polygon({
-            map,
-            paths: geometry.coordinates.map(ring => ring.map(([lng, lat]) => ({ lat, lng }))),
-            fillColor: '#b14a1f', fillOpacity: 0.10,
-            strokeColor: '#d96a35', strokeWeight: 1.5, strokeOpacity: 0.45,
-            clickable: false,
-          });
-        })
-        .catch(() => { /* outline is decorative — map still works without it */ });
-
       const iw = new google.maps.InfoWindow({ maxWidth: 280 });
       const bounds = new google.maps.LatLngBounds();
       let hinted = false;
+
+      const areaPath = serviceAreaPath(LOCATIONS, SERVICE_AREA_BUFFER_MILES);
+      areaPath.forEach(point => bounds.extend(point));
+
+      // The rest of Arkansas is grayed out, and clicking it explains why. The state
+      // outline is self-hosted and drawn as a plain Polygon (the Data layer's GeoJSON
+      // parser rejects this ring with "first and last positions are not equal").
+      fetch('/assets/data/arkansas.geojson')
+        .then(r => r.json())
+        .then(({ geometry }) => {
+          const statePath = geometry.coordinates[0].map(([lng, lat]) => ({ lat, lng }));
+          const restOfState = new google.maps.Polygon({
+            map,
+            paths: [clockwise(statePath), areaPath],
+            fillColor: '#8c8782', fillOpacity: 0.26,
+            strokeColor: '#c4b8a8', strokeWeight: 1, strokeOpacity: 0.4,
+            zIndex: 1,
+          });
+          restOfState.addListener('click', e => {
+            iw.setContent(iwTemplate(
+              'Outside the line?',
+              '<p class="mw-note">Travel fees may apply. Call anyway.</p>',
+              'Outside our regular area'
+            ));
+            iw.setPosition(e.latLng); iw.open(map); dismissHint();
+          });
+
+          const stateBounds = new google.maps.LatLngBounds();
+          statePath.forEach(point => stateBounds.extend(point));
+          map.fitBounds(stateBounds, 24);
+        })
+        // The gray is decorative, so without it the map just opens on the service area.
+        .catch(() => map.fitBounds(bounds, 44));
+
+      new google.maps.Polygon({
+        map,
+        paths: areaPath,
+        fillColor: '#ad481e', fillOpacity: 0.12,
+        strokeColor: '#d96a35', strokeWeight: 2, strokeOpacity: 0.95,
+        clickable: false,
+        zIndex: 2,
+      });
 
       function dismissHint() {
         if (hinted) return; hinted = true;
@@ -176,7 +207,6 @@ export default function Coverage() {
 
       LOCATIONS.forEach(loc => {
         const pos = { lat: loc.lat, lng: loc.lng };
-        bounds.extend(pos);
         new MapPin({
           position: pos, svg: TOWN_PIN_SVG, anchorX: 11, anchorY: 30,
           onClick: () => {
@@ -186,7 +216,6 @@ export default function Coverage() {
         }).setMap(map);
       });
 
-      google.maps.event.addListenerOnce(map, 'idle', () => map.fitBounds(bounds, 56));
     };
 
     if (window.google?.maps) {
@@ -215,7 +244,7 @@ export default function Coverage() {
             <div className="section-head reveal" ref={headReveal}>
               <span className="eyebrow">Where we roll</span>
               <h1 id="area-heading">Mobile RV Repair Service Area</h1>
-              <p>Looking for mobile RV repair near you in central Arkansas? We keep a tight service radius so our techs can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
+              <p>Looking for mobile RV repair near you in central Arkansas? We keep a tight service area so our techs can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
             </div>
             <ul className="area-towns reveal" ref={townsReveal} aria-label="Towns served">
               <li>Beebe</li>
@@ -228,9 +257,10 @@ export default function Coverage() {
               <li>Vilonia</li>
               <li>Ward</li>
             </ul>
-            <p className="area-note">→ Outside the circle? Call anyway — travel fee may apply.</p>
+            <p className="area-note">Outside the line on the map? Call anyway. Travel fees may apply.</p>
           </div>
 
+          <div className="area-map-col">
           <div className="area-map reveal" ref={areaReveal} role="region" aria-label="Interactive service area map — click any town for service details">
             <div id="coverage-map" ref={mapRef} hidden={mapError}></div>
             {mapsAllowed && mapError && (
@@ -253,6 +283,12 @@ export default function Coverage() {
               </svg>
               Click any town for service details
             </div>
+          </div>
+          <div className="map-legend" hidden={!mapsAllowed || mapError}>
+            <p className="map-legend-row"><span className="map-legend-swatch map-legend-swatch--in" aria-hidden="true" />Regular service area</p>
+            <p className="map-legend-row"><span className="map-legend-swatch map-legend-swatch--out" aria-hidden="true" />Gray area: travel fees may apply</p>
+            <a className="map-legend-call" href={SITE.phoneHref}>Call anyway: {SITE.phone}</a>
+          </div>
           </div>
         </div>
       </section>
