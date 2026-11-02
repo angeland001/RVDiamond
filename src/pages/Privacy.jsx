@@ -29,7 +29,7 @@ export default function Privacy() {
         <h2>Information we collect</h2>
         <ul>
           <li><strong>Service requests.</strong> When you submit our contact form we collect your name, phone number, email address, city or town, the service you need, and anything you write about your RV.</li>
-          <li><strong>Email preferences.</strong> If you check the opt-in box, we record that you agreed to receive marketing email, along with the date and time.</li>
+          <li><strong>Email preferences.</strong> If you check the opt-in box, we record that you agreed to receive marketing email, along with the date, time and your IP address.</li>
           <li><strong>Calls and texts.</strong> If you call or text us, we receive your phone number and whatever you share with us.</li>
           <li><strong>Technical data.</strong> Our hosting provider automatically logs basic request data (such as IP address, browser type and pages requested) for security and reliability.</li>
         </ul>

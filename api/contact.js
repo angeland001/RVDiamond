@@ -85,13 +85,13 @@ export default async function handler(req, res) {
         <p style="margin:0 0 20px">We've received your request${f.service ? ` for <strong>${escapeHtml(f.service)}</strong>` : ''}. Here's what happens next:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
           ${step(1, 'Our team reviews your request.')}
-          ${step(2, 'We contact you the same business day (Mon–Fri, 9 am – 5 pm).')}
+          ${step(2, 'We contact you within one business day (Mon–Fri, 9 am – 5 pm).')}
           ${step(3, 'We set a time and come to you. No tow.')}
         </table>
         ${optIn ? `<p style="margin:18px 0 0;font-size:14px;color:${COLOR.inkSoft}">You also chose to receive seasonal maintenance reminders and specials. Every one of those emails includes a one-click unsubscribe link.</p>` : ''}`,
         `You're receiving this one-time message because you submitted a service request on our website.<br>${BRAND.name}${env.postalAddress ? ` · ${escapeHtml(env.postalAddress)}` : ''}`,
         {
-          preview: `We've received your request and will contact you the same business day.`,
+          preview: `We've received your request and will contact you within one business day.`,
           hero: { file: 'hero-confirmation.jpg', alt: 'Illustration of a vintage travel trailer' },
           cta: {
             title: 'Need us sooner?',

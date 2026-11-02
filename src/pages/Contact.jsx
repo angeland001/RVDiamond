@@ -48,7 +48,7 @@ export default function Contact() {
       <div className="section-head reveal" ref={headRef}>
         <span className="eyebrow">Get in touch</span>
         <h1 id="contact-heading">Want Stag on the Job?</h1>
-        <p>Calling is quickest — most calls get a real-time quote and a slot inside the week. Prefer to write? Send the form and our team will get back to you the same business day.</p>
+        <p>Calling is quickest — most calls get a real-time quote and a slot inside the week. Prefer to write? Send the form and our team will get back to you within one business day.</p>
       </div>
 
       <div className="contact-inner">
@@ -203,7 +203,7 @@ export default function Contact() {
           <div aria-live="polite">
             {status === 'sent' && (
               <p className="form-status form-status--ok">
-                Request received — check your inbox for a confirmation. Our team will be in touch the same business day.
+                Request received — check your inbox for a confirmation. Our team will be in touch within one business day.
               </p>
             )}
           </div>
