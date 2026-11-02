@@ -66,10 +66,7 @@ export default function Coverage() {
   const townsRef = useReveal();
   const areaRef  = useReveal();
 
-  usePageMeta(
-    'Service Area — Stag: Mobile RV Tech | Beebe, Cabot, Little Rock & More',
-    'Mobile RV repair across central Arkansas: Beebe, Cabot, Searcy, Jacksonville, Little Rock, North Little Rock, Lonoke, Vilonia and Ward.'
-  );
+  usePageMeta();
 
   // Google Maps can set third-party cookies, so it only loads after consent.
   const [mapsAllowed, setMapsAllowed] = useState(() => getConsent() === 'all');
@@ -112,7 +109,7 @@ export default function Coverage() {
           .mw-stat{flex:1}
           .mw-value{font-size:14px;font-weight:700;color:#f1e7d1;white-space:nowrap}
           .mw-unit{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#b08a5b;margin-top:2px}
-          .mw-cta{display:flex;align-items:center;gap:7px;justify-content:center;background:#b14a1f;color:#f1e7d1;text-decoration:none;padding:9px 14px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .1s}
+          .mw-cta{display:flex;align-items:center;gap:7px;justify-content:center;background:#ad481e;color:#f1e7d1;text-decoration:none;padding:9px 14px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .1s}
           .mw-cta:hover{background:#d96a35}
         `;
         document.head.appendChild(s);
@@ -217,8 +214,8 @@ export default function Coverage() {
           <div>
             <div className="section-head reveal" ref={headReveal}>
               <span className="eyebrow">Where we roll</span>
-              <h1 id="area-heading">Service Area</h1>
-              <p>We keep a tight service radius so our techs can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
+              <h1 id="area-heading">Mobile RV Repair Service Area</h1>
+              <p>Looking for mobile RV repair near you in central Arkansas? We keep a tight service radius so our techs can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
             </div>
             <ul className="area-towns reveal" ref={townsReveal} aria-label="Towns served">
               <li>Beebe</li>
@@ -226,7 +223,7 @@ export default function Coverage() {
               <li>Jacksonville</li>
               <li>Little Rock</li>
               <li>Lonoke</li>
-              <li>N. Little Rock</li>
+              <li>North Little Rock</li>
               <li>Searcy</li>
               <li>Vilonia</li>
               <li>Ward</li>

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SITE } from '../config/site';
+import { PAGE_META } from '../config/seo';
 
 function setMeta(attr, key, content) {
   let el = document.head.querySelector(`meta[${attr}="${key}"]`);
@@ -13,8 +14,9 @@ function setMeta(attr, key, content) {
 }
 
 // Per-page <title>, description, canonical and Open Graph tags for SEO / link previews.
-export function usePageMeta(title, description) {
+export function usePageMeta() {
   const { pathname } = useLocation();
+  const { title, description } = PAGE_META[pathname] ?? PAGE_META['/'];
 
   useEffect(() => {
     const origin = SITE.url || window.location.origin;

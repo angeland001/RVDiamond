@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useReveal } from '../hooks/useReveal';
 import { usePageMeta } from '../hooks/usePageMeta';
@@ -6,11 +6,20 @@ import EmergencyNote from '../components/EmergencyNote';
 import EmailLink from '../components/EmailLink';
 import { SITE } from '../config/site';
 
+// Optional spam check. Stays off until this Cloudflare site key is set in Vercel.
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
 export default function Contact() {
-  usePageMeta(
-    'Contact — Stag: Mobile RV Tech | Request Mobile RV Service',
-    'Call, text or send a service request to Stag: Mobile RV Tech. Mobile RV repair across central Arkansas, Mon–Fri 9 am – 5 pm.'
-  );
+  usePageMeta();
+
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) return;
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    document.head.appendChild(script);
+    return () => script.remove();
+  }, []);
 
   // idle | sending | sent | error
   const [status, setStatus] = useState('idle');
@@ -37,6 +46,7 @@ export default function Contact() {
     } catch {
       setStatus('error');
     }
+    window.turnstile?.reset();
   }
 
   const headRef = useReveal();
@@ -190,6 +200,8 @@ export default function Contact() {
             We'll only use your details to respond to this request unless you opt in above.
             See our <Link to="/privacy">Privacy Policy</Link>.
           </p>
+
+          {TURNSTILE_SITE_KEY && <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} />}
 
           <div className="submit-row">
             <button className="btn btn-primary" type="submit" disabled={status === 'sending'}>

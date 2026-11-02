@@ -4,7 +4,6 @@ export const SITE = {
   name:       'Stag: Mobile RV Tech',
   shortName:  'Stag',
   tagline:    'Mobile RV Repair · Central Arkansas',
-  founded:    2014,
   phone:      '(501) 466-7786',
   phoneHref:  'tel:+15014667786',
   smsHref:    'sms:+15014667786',

@@ -3,13 +3,10 @@ import { clearConsent } from '../lib/consent';
 import { SITE } from '../config/site';
 import EmailLink from '../components/EmailLink';
 
-const EFFECTIVE_DATE = 'October 13, 2026';
+const EFFECTIVE_DATE = 'November 2, 2026';
 
 export default function Privacy() {
-  usePageMeta(
-    'Privacy Policy — Stag: Mobile RV Tech',
-    'How Stag: Mobile RV Tech collects, uses and protects your information, including email preferences and cookies.'
-  );
+  usePageMeta();
 
   return (
     <section className="section legal" aria-labelledby="privacy-heading">
@@ -31,7 +28,7 @@ export default function Privacy() {
           <li><strong>Service requests.</strong> When you submit our contact form we collect your name, phone number, email address, city or town, the service you need, and anything you write about your RV.</li>
           <li><strong>Email preferences.</strong> If you check the opt-in box, we record that you agreed to receive marketing email, along with the date, time and your IP address.</li>
           <li><strong>Calls and texts.</strong> If you call or text us, we receive your phone number and whatever you share with us.</li>
-          <li><strong>Technical data.</strong> Our hosting provider automatically logs basic request data (such as IP address, browser type and pages requested) for security and reliability.</li>
+          <li><strong>Technical data.</strong> Our hosting provider automatically logs basic request data (such as IP address, browser type and pages requested) for security and reliability. Our contact form also briefly uses your IP address to limit spam.</li>
         </ul>
 
         <h2>How we use it</h2>
@@ -69,7 +66,11 @@ export default function Privacy() {
         <ul>
           <li><strong>Vercel</strong> — website hosting.</li>
           <li><strong>Resend</strong> — delivery of confirmation and marketing email.</li>
-          <li><strong>Google</strong> — interactive map (only with your consent).</li>
+          <li><strong>Google Workspace</strong> — our business email, where service requests and replies are received and stored.</li>
+          <li><strong>Google Maps</strong> — interactive map (only with your consent).</li>
+          {import.meta.env.VITE_TURNSTILE_SITE_KEY && (
+            <li><strong>Cloudflare Turnstile</strong> — checks that contact form submissions come from a person.</li>
+          )}
         </ul>
         <p>We may also disclose information if required by law or to protect our rights and safety.</p>
 

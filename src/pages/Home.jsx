@@ -29,10 +29,7 @@ export default function Home() {
   const scrollRoot   = useRef(null);
   const loaderRef    = useRef(null);
 
-  usePageMeta(
-    'Stag: Mobile RV Tech — Mobile RV Repair in Central Arkansas',
-    'Certified mobile RV repair across central Arkansas. AC, plumbing, electrical, winterizing and pre-purchase inspections done on-site at your home, campground or storage lot.'
-  );
+  usePageMeta();
 
   // Video-scrub scroll animation — single 0.67 MB MP4 instead of 121 separate images
   useEffect(() => {
@@ -182,7 +179,7 @@ export default function Home() {
             <div className="scroll-anim-overlay" aria-hidden="true" />
 
             <div className="scroll-anim-stage">
-              <span className="scroll-anim-eyebrow">{SITE.name} · Central Arkansas</span>
+              <span className="scroll-anim-eyebrow">Mobile RV Repair · Central Arkansas</span>
               <h1 className="scroll-anim-title display" aria-label="RV down? We fix it on-site.">
                 <SplitText text="RV down?" delay={120} duration={1.4} startIndex={0} />
                 {' '}
@@ -222,7 +219,7 @@ export default function Home() {
             <ul className="hero-bullets" aria-label="Certifications and highlights">
               <li><CheckIcon />RVTAA Certified</li>
               <li><CheckIcon />Insured</li>
-              <li><CheckIcon />12 yrs in the trade</li>
+              <li><CheckIcon />Hands-on RV experience</li>
               <li><CheckIcon />All brands</li>
             </ul>
             <div className="hero-cta-row">
@@ -246,10 +243,12 @@ export default function Home() {
             transitionDuration={700}
           >
             <img
-              src="/assets/images/Woody_Repairing_RV.png"
-              alt="Stag: Mobile RV Tech technician repairing an RV on-site"
+              src="/assets/images/Woody_Repairing_RV.webp"
+              alt="Stag: Mobile RV Tech technician repairing RV wiring"
               className="hero-photo-img"
-              loading="eager"
+              width="800"
+              height="1600"
+              loading="lazy"
             />
             <div className="hero-stamp" aria-hidden="true">
               <span className="stamp-tiny">No tow</span>

@@ -5,7 +5,6 @@ import Footer from './Footer';
 import CallBar from './CallBar';
 import PageLoader from './PageLoader';
 import CookieBanner from './CookieBanner';
-import StructuredData from './StructuredData';
 
 const LOADER_TAGS = {
   '/':         'Warming the truck',
@@ -35,7 +34,6 @@ export default function Layout() {
       <Footer />
       <CallBar />
       <CookieBanner />
-      <StructuredData />
     </>
   );
 }

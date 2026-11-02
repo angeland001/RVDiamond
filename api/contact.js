@@ -8,6 +8,42 @@ import { env, BRAND, COLOR, resend, escapeHtml, htmlToText, layout, eyebrow, hea
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LEN = { name: 120, phone: 40, email: 254, city: 120, service: 80, message: 4000 };
 const MIN_FILL_MS = 3000; // no human fills name, phone and email in under 3 s
+const SERVICES = ['HVAC repair', 'Plumbing', 'Electrical', 'Winterizing', 'De-winterizing', 'Pre-purchase inspection', 'Other / not sure'];
+const ALLOWED_ORIGINS = ['https://www.stagmobilervtech.com', 'https://stagmobilervtech.com'];
+const FIRST_NAME_RE = /^[\p{L}'’-]{1,30}$/u;
+
+// Best-effort limits. Each serverless instance keeps its own counts, so these
+// slow down abuse from one source rather than setting an exact global cap.
+const LIMITS = { ip: { max: 5, ms: 15 * 60 * 1000 }, email: { max: 3, ms: 60 * 60 * 1000 } };
+const hits = new Map();
+
+function overLimit(kind, key) {
+  const { max, ms } = LIMITS[kind];
+  const now = Date.now();
+  if (hits.size > 5000) hits.clear();
+  const id = `${kind}:${key}`;
+  const recent = (hits.get(id) || []).filter(t => now - t < ms);
+  recent.push(now);
+  hits.set(id, recent);
+  return recent.length > max;
+}
+
+// Cloudflare Turnstile runs only once TURNSTILE_SECRET_KEY is set.
+async function passesTurnstile(token, ip) {
+  if (!process.env.TURNSTILE_SECRET_KEY) return true;
+  if (!token) return false;
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: process.env.TURNSTILE_SECRET_KEY, response: token, remoteip: ip }),
+    });
+    return (await res.json()).success === true;
+  } catch (err) {
+    console.error('[contact] Turnstile check failed', err);
+    return false;
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -15,12 +51,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Browsers always send Origin on this request; other sites' pages can't use the form.
+  if (!ALLOWED_ORIGINS.includes(req.headers.origin)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   const body = typeof req.body === 'string' ? safeJson(req.body) : (req.body || {});
 
   // Honeypot filled in, or submitted too fast → almost certainly a bot.
   // Pretend success and send nothing, so bots don't learn to adapt.
   const elapsed = Number(body.elapsedMs);
-  if (body.website || (Number.isFinite(elapsed) && elapsed < MIN_FILL_MS)) {
+  if (body.website || !Number.isFinite(elapsed) || elapsed < MIN_FILL_MS) {
     return res.status(200).json({ ok: true });
   }
 
@@ -29,6 +70,10 @@ export default async function handler(req, res) {
     f[key] = String(body[key] ?? '').trim().slice(0, MAX_LEN[key]);
   }
   const optIn = body.marketingOptIn === true;
+  // The confirmation goes to whatever address was typed in, so keep free text out of it.
+  if (!SERVICES.includes(f.service)) f.service = '';
+  const firstName = f.name.split(' ')[0];
+  const greeting = FIRST_NAME_RE.test(firstName) ? `Thanks, ${escapeHtml(firstName)}.` : 'Thanks.';
 
   if (!f.name || !f.phone || !EMAIL_RE.test(f.email)) {
     return res.status(400).json({ error: 'Name, phone and a valid email are required.' });
@@ -38,11 +83,18 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Email is not configured.' });
   }
 
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  if (overLimit('ip', ip) || overLimit('email', f.email.toLowerCase())) {
+    return res.status(429).json({ error: 'Too many requests. Please call or text us instead.' });
+  }
+  if (!await passesTurnstile(body['cf-turnstile-response'], ip)) {
+    return res.status(403).json({ error: 'Could not verify this request.' });
+  }
+
   const consentAt = new Date().toISOString();
   const receivedAt = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Chicago', dateStyle: 'medium', timeStyle: 'short',
   }).format(new Date());
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
   const telHref = 'tel:' + f.phone.replace(/[^\d+]/g, '');
 
   try {
@@ -81,7 +133,7 @@ export default async function handler(req, res) {
     // 2. Transactional confirmation to the customer (no promotional content).
     const customerHtml = layout(`
         ${eyebrow('Request received')}
-        ${heading(`Thanks, ${escapeHtml(f.name.split(' ')[0])}. We've got it.`)}
+        ${heading(`${greeting} We've got it.`)}
         <p style="margin:0 0 20px">We've received your request${f.service ? ` for <strong>${escapeHtml(f.service)}</strong>` : ''}. Here's what happens next:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
           ${step(1, 'Our team reviews your request.')}

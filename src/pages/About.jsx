@@ -14,10 +14,7 @@ const CheckIcon = () => (
 );
 
 export default function About() {
-  usePageMeta(
-    'About — Stag: Mobile RV Tech | Central Arkansas',
-    'Since 2014, Stag: Mobile RV Tech has brought certified, insured RV technicians to RV owners across central Arkansas.'
-  );
+  usePageMeta();
 
   const photoRef = useReveal();
   const copyRef  = useReveal();
@@ -37,9 +34,11 @@ export default function About() {
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             >
               <img
-                src="/assets/images/Woody_with_wife.JPEG"
+                src="/assets/images/Woody_with_wife.webp"
                 alt="The people behind Stag: Mobile RV Tech"
                 className="about-photo-img"
+                width="666"
+                height="1332"
                 loading="lazy"
               />
             </GlareHover>
@@ -49,7 +48,7 @@ export default function About() {
             <span className="eyebrow">About</span>
             <h1 id="about-heading">
               <BlurText
-                text="Twelve years under rigs. Built for the long haul."
+                text="Real experience under rigs. Built for the long haul."
                 animateBy="words"
                 delay={70}
                 stepDuration={0.4}
@@ -69,16 +68,12 @@ export default function About() {
 
             <div className="about-stats" aria-label="At-a-glance stats">
               <div className="stat">
-                <span className="stat-num display">
-                  <CountUp to={12} from={0} duration={2} delay={0.2} />+
-                </span>
-                <span className="stat-label">Years in service</span>
+                <span className="stat-num stat-num--word display">Hands-on</span>
+                <span className="stat-label">Experience fixing RVs</span>
               </div>
               <div className="stat">
-                <span className="stat-num display">
-                  <CountUp to={1400} from={0} duration={2.5} delay={0.3} separator="," />
-                </span>
-                <span className="stat-label">Rigs serviced</span>
+                <span className="stat-num stat-num--word display">On-site</span>
+                <span className="stat-label">Repairs at your rig</span>
               </div>
               <div className="stat">
                 <span className="stat-num display">

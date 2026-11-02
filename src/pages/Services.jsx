@@ -13,7 +13,7 @@ const SERVICES = [
         <path d="M7 14a5 5 0 0 0 10 0" />
       </svg>
     ),
-    title: 'AC Service',
+    title: 'RV AC Service',
     desc: 'Roof A/C, furnaces, thermostats and ducting. Diagnosed and repaired at your site.',
     items: ['A/C not cooling', 'Furnace won\'t ignite', 'Capacitor & fan motor', 'Thermostat swap-outs'],
     illus: (
@@ -42,7 +42,7 @@ const SERVICES = [
         <path d="M12 3c0 0 6 6.5 6 11a6 6 0 1 1-12 0c0-4.5 6-11 6-11z" />
       </svg>
     ),
-    title: 'Plumbing Repair',
+    title: 'RV Plumbing Repair',
     desc: 'Fresh, gray and black water systems. Leaks, pumps, valves, water heaters.',
     items: ['Leak chase & reseal', 'Water pump replace', 'Hot water tank service', 'Toilet & seal rebuild'],
     illus: (
@@ -68,7 +68,7 @@ const SERVICES = [
         <path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z" />
       </svg>
     ),
-    title: 'Electrical Repair',
+    title: 'RV Electrical Repair',
     desc: '12V house, shore power and converter/inverter systems. Safe, code-aware work.',
     items: ['Shore power issues', 'Converter & inverter', 'Battery & solar', 'Outlets, lights, breakers'],
     illus: (
@@ -95,7 +95,7 @@ const SERVICES = [
         <path d="m4 5 16 14M20 5 4 19" />
       </svg>
     ),
-    title: 'Winterizing',
+    title: 'RV Winterizing',
     desc: 'Done right the first time. Blow-out plus antifreeze, full system protection.',
     items: ['Air blow-out', 'RV antifreeze fill', 'Heater & ice maker', 'Storage prep'],
     illus: (
@@ -130,7 +130,7 @@ const SERVICES = [
         <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5" />
       </svg>
     ),
-    title: 'De-Winterizing',
+    title: 'RV De-Winterizing',
     desc: 'Spring start-up — flush, sanitize, pressure-test, and a full systems check.',
     items: ['Flush & sanitize', 'Pressure test', 'Appliance check', 'Seal & roof inspection'],
     illus: (
@@ -162,7 +162,7 @@ const SERVICES = [
         <path d="M8 10h8M8 14h8M8 18h5" strokeLinecap="round" />
       </svg>
     ),
-    title: 'Pre-Purchase Inspection',
+    title: 'RV Pre-Purchase Inspection',
     desc: 'Independent eyes before you sign. Written report covering structure, systems and safety.',
     items: ['Roof, seals, slides', 'All major systems', 'Safety & propane', 'Photos + written report'],
     illus: (
@@ -182,6 +182,25 @@ const SERVICES = [
   },
 ];
 
+const FAQS = [
+  {
+    q: 'Do you come to me?',
+    a: 'Yes. We do mobile RV repair on-site at your home, the campground, the storage lot or the roadside, so there is no tow.',
+  },
+  {
+    q: 'What areas do you serve?',
+    a: 'Central Arkansas, including Beebe, Cabot, Jacksonville, Little Rock, Lonoke, North Little Rock, Searcy, Vilonia and Ward. Outside that area, call anyway. A travel fee may apply.',
+  },
+  {
+    q: 'What can you fix?',
+    a: 'RV AC and furnaces, plumbing and water systems, 12V and shore power electrical, winterizing and de-winterizing. We also do pre-purchase inspections with photos and a written report.',
+  },
+  {
+    q: 'When are you open?',
+    a: `${SITE.hours}. Weekend and after-5 pm emergency calls carry a ${SITE.emergencyFee} emergency fee.`,
+  },
+];
+
 function ServiceCard({ num, icon, title, desc, items, illus }) {
   const ref = useReveal();
   return (
@@ -197,10 +216,7 @@ function ServiceCard({ num, icon, title, desc, items, illus }) {
 }
 
 export default function Services() {
-  usePageMeta(
-    'RV Repair Services — Stag: Mobile RV Tech | Central Arkansas',
-    'Mobile RV AC service, plumbing, electrical repair, winterizing, de-winterizing and pre-purchase inspections across central Arkansas.'
-  );
+  usePageMeta();
 
   const headRef = useReveal();
 
@@ -210,7 +226,7 @@ export default function Services() {
         <div className="services-intro">
           <div className="section-head reveal" ref={headRef}>
             <span className="eyebrow">What we fix</span>
-            <h1 id="services-heading">Get Things Done Right</h1>
+            <h1 id="services-heading">Mobile RV Repair Services</h1>
             <p>We're not generalists with a tool belt. Every service below is something our technicians handle every week, with the parts and diagnostic gear on the truck to finish in one visit.</p>
           </div>
         </div>
@@ -228,6 +244,16 @@ export default function Services() {
 
         <div className="services-grid">
           {SERVICES.map(s => <ServiceCard key={s.num} {...s} />)}
+        </div>
+
+        <div className="faq" aria-labelledby="faq-heading">
+          <h2 id="faq-heading">Common questions</h2>
+          {FAQS.map(({ q, a }) => (
+            <div className="faq-item" key={q}>
+              <h3>{q}</h3>
+              <p>{a}</p>
+            </div>
+          ))}
         </div>
       </section>
 

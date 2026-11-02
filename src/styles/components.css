@@ -30,7 +30,7 @@
   border-color: var(--accent-deep);
   box-shadow: 0 3px 0 var(--accent-deep);
 }
-.btn-primary:hover { background: var(--accent-glow); }
+.btn-primary:hover { background: var(--accent-deep); }
 .btn-ghost {
   background: transparent;
   color: var(--ink);
@@ -850,6 +850,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+  align-items: end;
   border-top: 1px dashed var(--rule);
 }
 .about-stats .stat { display: grid; gap: 2px; }
@@ -858,6 +859,10 @@
   font-size: clamp(28px, 5vw, 40px);
   color: var(--accent);
   line-height: 1;
+}
+.about-stats .stat-num--word {
+  font-size: clamp(19px, 2.6vw, 26px);
+  align-self: end;
 }
 .about-stats .stat-label {
   font-family: var(--font-mono);
@@ -1317,3 +1322,24 @@ footer.site-footer {
 .legal-body ul { padding-left: 20px; }
 .legal-body li { margin-bottom: 6px; }
 .legal-body a { color: var(--accent-deep); }
+
+/* ════════════════════════ SERVICES FAQ ════════════════════════ */
+.faq {
+  max-width: 760px;
+  margin: 48px auto 0;
+  display: grid;
+  gap: 18px;
+}
+.faq > h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 34px);
+  line-height: 1.1;
+  margin: 0;
+}
+.faq-item {
+  border-top: 1px solid var(--rule-soft);
+  padding-top: 14px;
+}
+.faq-item h3 { margin: 0 0 4px; font-size: 17px; }
+.faq-item p { margin: 0; color: var(--ink-2); }

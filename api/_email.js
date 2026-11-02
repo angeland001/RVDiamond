@@ -23,7 +23,7 @@ export const COLOR = {
   paper:    '#faf3e2',
   ink:      '#1f1610',
   inkSoft:  '#5a4634',
-  rust:     '#b14a1f',
+  rust:     '#ad481e',
   rustDeep: '#8a3614',
   rule:     '#d9c9a8',
 };
@@ -117,7 +117,10 @@ export function layout(innerHtml, footerHtml, { preview, hero, strip, cta } = {}
   <meta name="supported-color-schemes" content="light">
   <!--[if mso]><style>td,p,a,h1,h2,h3{font-family:Arial,Helvetica,sans-serif!important}.email-title{font-family:Georgia,serif!important}</style><![endif]-->
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+    @font-face{font-family:'Alfa Slab One';font-weight:400;src:url('${BRAND.url}/assets/email/fonts/alfa-slab-one-latin-400-normal.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-weight:400;src:url('${BRAND.url}/assets/email/fonts/inter-latin-400-normal.woff2') format('woff2')}
+    @font-face{font-family:'Inter';font-weight:700;src:url('${BRAND.url}/assets/email/fonts/inter-latin-700-normal.woff2') format('woff2')}
+    @font-face{font-family:'JetBrains Mono';font-weight:400;src:url('${BRAND.url}/assets/email/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2')}
     @media (max-width:480px){
       .email-pad{padding-left:18px!important;padding-right:18px!important}
       .email-title{font-size:26px!important}
