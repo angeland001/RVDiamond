@@ -16,6 +16,8 @@
   --accent:       var(--rust);
   --accent-deep:  var(--rust-deep);
   --accent-glow:  var(--rust-glow);
+  --teal:         #2fb5a8; /* third color on dark surfaces */
+  --teal-deep:    #0f7168; /* third color on cream surfaces */
   --pine:         #2f5037;
   --mustard:      #c98a16;
   --rule:         #b08a5b;

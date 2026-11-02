@@ -5,44 +5,8 @@ import EmergencyNote from '../components/EmergencyNote';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { SITE } from '../config/site';
 import { getConsent, setConsent, onConsentChange } from '../lib/consent';
-import { serviceAreaPath, clockwise } from '../lib/serviceArea';
-
-const SERVICE_AREA_BUFFER_MILES = 12; // how far the outline sits beyond the outermost towns
-
-const LOCATIONS = [
-  { label: 'Beebe',             lat: 35.0723, lng: -91.8837 },
-  { label: 'Cabot',             lat: 34.9748, lng: -92.0171 },
-  { label: 'Little Rock',       lat: 34.7465, lng: -92.2896 },
-  { label: 'Searcy',            lat: 35.2506, lng: -91.7368 },
-  { label: 'Vilonia',           lat: 35.0879, lng: -92.2013 },
-  { label: 'Ward',              lat: 34.9973, lng: -91.9462 },
-  { label: 'Lonoke',            lat: 34.7884, lng: -91.9008 },
-  { label: 'Jacksonville',      lat: 34.8665, lng: -92.1099 },
-  { label: 'North Little Rock', lat: 34.7695, lng: -92.2671 },
-];
-
-const MAP_STYLES = [
-  { featureType: 'all',            elementType: 'geometry',                  stylers: [{ color: '#1a110a' }] },
-  { featureType: 'all',            elementType: 'labels.text.stroke',        stylers: [{ color: '#1a110a' }] },
-  { featureType: 'all',            elementType: 'labels.text.fill',          stylers: [{ color: '#b08a5b' }] },
-  { featureType: 'administrative', elementType: 'geometry.fill',             stylers: [{ color: '#2c1f14' }] },
-  { featureType: 'administrative', elementType: 'geometry.stroke',           stylers: [{ color: '#462c1a' }] },
-  { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#c8a57a' }] },
-  { featureType: 'administrative.province', elementType: 'labels.text.fill', stylers: [{ color: '#8c6d4f' }] },
-  { featureType: 'landscape',      elementType: 'geometry',                  stylers: [{ color: '#1f1510' }] },
-  { featureType: 'poi',            stylers:                                  [{ visibility: 'off' }] },
-  { featureType: 'road',           elementType: 'geometry.fill',             stylers: [{ color: '#2c1d12' }] },
-  { featureType: 'road',           elementType: 'geometry.stroke',           stylers: [{ color: '#3d2615' }] },
-  { featureType: 'road',           elementType: 'labels.text.fill',          stylers: [{ color: '#8c6d4f' }] },
-  { featureType: 'road',           elementType: 'labels.icon',               stylers: [{ visibility: 'off' }] },
-  { featureType: 'road.highway',   elementType: 'geometry.fill',             stylers: [{ color: '#5c3820' }] },
-  { featureType: 'road.highway',   elementType: 'geometry.stroke',           stylers: [{ color: '#7a4a28' }] },
-  { featureType: 'road.highway',   elementType: 'labels.text.fill',          stylers: [{ color: '#e8c89a' }] },
-  { featureType: 'road.arterial',  elementType: 'geometry.fill',             stylers: [{ color: '#3a2518' }] },
-  { featureType: 'transit',        stylers:                                  [{ visibility: 'off' }] },
-  { featureType: 'water',          elementType: 'geometry',                  stylers: [{ color: '#0d0906' }] },
-  { featureType: 'water',          elementType: 'labels.text.fill',          stylers: [{ color: '#6b4e37' }] },
-];
+import { MAP_STYLES, loadGoogleMaps, onMapsAuthFailure } from '../lib/googleMaps';
+import { SERVICE_TOWNS as LOCATIONS, SERVICE_AREA_BUFFER_MILES, serviceAreaPath, clockwise } from '../lib/serviceArea';
 
 const TOWN_PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="30" viewBox="0 0 22 30" style="display:block">
   <path d="M11 1C5.5 1 1 5.5 1 11c0 9 10 18 10 18S21 20 21 11C21 5.5 16.5 1 11 1z" fill="#e8dcc0" stroke="#b08a5b" stroke-width="1"/>
@@ -85,10 +49,7 @@ export default function Coverage() {
       return;
     }
 
-    // Google calls this when the API key rejects the page (e.g. RefererNotAllowedMapError).
-    window.gm_authFailure = () => setMapError(true);
-
-    window.initCoverageMap = function () {
+    const initCoverageMap = () => {
       const el = mapRef.current;
       // StrictMode runs effects twice on the same DOM node; a second Map on the
       // same div breaks the first one's internal observers.
@@ -218,18 +179,8 @@ export default function Coverage() {
 
     };
 
-    if (window.google?.maps) {
-      window.initCoverageMap();
-      return;
-    }
-
-    if (document.getElementById('gmaps-script')) return;
-
-    const script = document.createElement('script');
-    script.id  = 'gmaps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initCoverageMap&loading=async`;
-    script.async = true;
-    document.head.appendChild(script);
+    loadGoogleMaps().then(initCoverageMap).catch(() => setMapError(true));
+    return onMapsAuthFailure(() => setMapError(true));
   }, [mapsAllowed]);
 
   const headReveal  = useReveal();

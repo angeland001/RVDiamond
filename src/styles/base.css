@@ -59,7 +59,7 @@ a   { color: inherit; }
   font-size: 11px;
   letter-spacing: .18em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--teal-deep);
   display: block;
 }
 

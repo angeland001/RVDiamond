@@ -3,6 +3,20 @@
 const MILES_PER_DEGREE_LAT = 69;
 const CIRCLE_POINTS = 32;
 
+export const SERVICE_AREA_BUFFER_MILES = 12; // how far the outline sits beyond the outermost towns
+
+export const SERVICE_TOWNS = [
+  { label: 'Beebe',             lat: 35.0723, lng: -91.8837 },
+  { label: 'Cabot',             lat: 34.9748, lng: -92.0171 },
+  { label: 'Little Rock',       lat: 34.7465, lng: -92.2896 },
+  { label: 'Searcy',            lat: 35.2506, lng: -91.7368 },
+  { label: 'Vilonia',           lat: 35.0879, lng: -92.2013 },
+  { label: 'Ward',              lat: 34.9973, lng: -91.9462 },
+  { label: 'Lonoke',            lat: 34.7884, lng: -91.9008 },
+  { label: 'Jacksonville',      lat: 34.8665, lng: -92.1099 },
+  { label: 'North Little Rock', lat: 34.7695, lng: -92.2671 },
+];
+
 function cross(o, a, b) {
   return (a.lng - o.lng) * (b.lat - o.lat) - (a.lat - o.lat) * (b.lng - o.lng);
 }
