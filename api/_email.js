@@ -43,6 +43,24 @@ export function escapeHtml(value = '') {
     .replace(/'/g, '&#39;');
 }
 
+// Plain-text alternative for multipart emails. HTML-only mail scores worse
+// with spam filters, so every send includes a text part.
+export function htmlToText(html = '') {
+  return String(html)
+    .replace(/<div style="display:none[\s\S]*?<\/div>/i, '')
+    .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, '$2 ($1)')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|h[1-6]|tr|div)>/gi, '\n\n')
+    .replace(/<\/td>\s*<td[^>]*>/gi, ': ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/^[ \t]+/gm, '')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 // Shared wrapper so every email looks like it came from the same company.
 export function layout(innerHtml, footerHtml) {
   return `<!doctype html><html><body style="margin:0;background:#f1e7d1;font-family:Arial,Helvetica,sans-serif;color:#1f1610">

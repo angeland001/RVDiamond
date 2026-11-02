@@ -3,10 +3,11 @@
 //  2. Sends the customer a transactional confirmation.
 //  3. If (and only if) the customer ticked the opt-in box, adds them to the
 //     marketing segment that the seasonal campaigns in /api/seasonal send to.
-import { env, BRAND, resend, escapeHtml, layout } from './_email.js';
+import { env, BRAND, resend, escapeHtml, htmlToText, layout } from './_email.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LEN = { name: 120, phone: 40, email: 254, city: 120, service: 80, message: 4000 };
+const MIN_FILL_MS = 3000; // no human fills name, phone and email in under 3 s
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,8 +17,12 @@ export default async function handler(req, res) {
 
   const body = typeof req.body === 'string' ? safeJson(req.body) : (req.body || {});
 
-  // Honeypot filled in → almost certainly a bot. Pretend success, send nothing.
-  if (body.website) return res.status(200).json({ ok: true });
+  // Honeypot filled in, or submitted too fast → almost certainly a bot.
+  // Pretend success and send nothing, so bots don't learn to adapt.
+  const elapsed = Number(body.elapsedMs);
+  if (body.website || (Number.isFinite(elapsed) && elapsed < MIN_FILL_MS)) {
+    return res.status(200).json({ ok: true });
+  }
 
   const f = {};
   for (const key of Object.keys(MAX_LEN)) {
@@ -34,43 +39,57 @@ export default async function handler(req, res) {
   }
 
   const consentAt = new Date().toISOString();
+  const receivedAt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Chicago', dateStyle: 'medium', timeStyle: 'short',
+  }).format(new Date());
   const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  const telHref = 'tel:' + f.phone.replace(/[^\d+]/g, '');
 
   try {
     // 1. Notify the business. Reply-To lets staff answer the customer directly.
     //    The consent line doubles as a record of when and where opt-in happened.
+    const staffHtml = layout(`
+        <h2 style="margin:0 0 4px;font-size:22px">New service request</h2>
+        <p style="margin:0 0 18px;font-size:13px;color:#5a4634">Received ${escapeHtml(receivedAt)} (Central) · Reply to this email to answer the customer.</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:15px">
+          ${row('Name', escapeHtml(f.name))}
+          ${row('Phone', `<a href="${escapeHtml(telHref)}" style="color:#8a3614">${escapeHtml(f.phone)}</a>`)}
+          ${row('Email', `<a href="mailto:${escapeHtml(f.email)}" style="color:#8a3614">${escapeHtml(f.email)}</a>`)}
+          ${row('City', escapeHtml(f.city || '—'))}
+          ${row('Service', escapeHtml(f.service || '—'))}
+        </table>
+        <h3 style="margin:20px 0 6px;font-size:16px">Details</h3>
+        <p style="margin:0;padding:12px 14px;background:#f1e7d1;border-left:3px solid #b14a1f;white-space:pre-wrap">${escapeHtml(f.message || '—')}</p>
+        <p style="margin:18px 0 0;font-size:13px;color:#5a4634"><strong>Marketing opt-in:</strong> ${optIn
+          ? `YES — checked on the website contact form at ${consentAt}${ip ? ` from IP ${escapeHtml(ip)}` : ''}`
+          : 'No'}</p>`,
+        'Internal notification from the website contact form.');
+
     await resend('/emails', {
       from: env.from,
       to: [env.businessEmail],
       reply_to: f.email,
-      subject: `New service request: ${f.service || 'General'} — ${f.name}`,
-      html: layout(`
-        <h2 style="margin:0 0 12px">New service request</h2>
-        <p><strong>Name:</strong> ${escapeHtml(f.name)}<br>
-        <strong>Phone:</strong> ${escapeHtml(f.phone)}<br>
-        <strong>Email:</strong> ${escapeHtml(f.email)}<br>
-        <strong>City:</strong> ${escapeHtml(f.city || '—')}<br>
-        <strong>Service:</strong> ${escapeHtml(f.service || '—')}</p>
-        <p><strong>Details:</strong><br>${escapeHtml(f.message || '—').replace(/\n/g, '<br>')}</p>
-        <p style="font-size:13px;color:#5a4634"><strong>Marketing opt-in:</strong> ${optIn
-          ? `YES — checked on the website contact form at ${consentAt}${ip ? ` from IP ${escapeHtml(ip)}` : ''}`
-          : 'No'}</p>`,
-        'Internal notification from the website contact form.'),
+      subject: `New service request: ${f.service || 'General'} - ${f.name}`,
+      html: staffHtml,
+      text: htmlToText(staffHtml),
     });
 
     // 2. Transactional confirmation to the customer (no promotional content).
-    await resend('/emails', {
-      from: env.from,
-      to: [f.email],
-      reply_to: env.businessEmail,
-      subject: `We received your service request — ${BRAND.name}`,
-      html: layout(`
+    const customerHtml = layout(`
         <p>Hi ${escapeHtml(f.name.split(' ')[0])},</p>
         <p>Thanks for reaching out to ${BRAND.name}. We've received your request${f.service ? ` for <strong>${escapeHtml(f.service)}</strong>` : ''} and our team will contact you the same business day (Mon–Fri, 9 am – 5 pm).</p>
         <p>Need us sooner? Call or text <a href="tel:${BRAND.tel}" style="color:#8a3614">${BRAND.phone}</a>.
         <strong>Weekend and after-5 pm emergency calls carry a $250 emergency fee.</strong></p>
         ${optIn ? '<p style="font-size:14px;color:#5a4634">You also chose to receive seasonal maintenance reminders and specials. Every one of those emails includes a one-click unsubscribe link.</p>' : ''}`,
-        `You're receiving this one-time message because you submitted a service request on our website.<br>${BRAND.name}${env.postalAddress ? ` · ${escapeHtml(env.postalAddress)}` : ''}`),
+        `You're receiving this one-time message because you submitted a service request on our website.<br>${BRAND.name}${env.postalAddress ? ` · ${escapeHtml(env.postalAddress)}` : ''}`);
+
+    await resend('/emails', {
+      from: env.from,
+      to: [f.email],
+      reply_to: env.businessEmail,
+      subject: `We received your service request - ${BRAND.name}`,
+      html: customerHtml,
+      text: htmlToText(customerHtml),
     });
   } catch (err) {
     console.error('[contact]', err);
@@ -95,6 +114,13 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({ ok: true });
+}
+
+function row(label, valueHtml) {
+  return `<tr>
+    <td style="padding:8px 12px 8px 0;border-bottom:1px solid #d9c9a8;width:90px;font-weight:bold;vertical-align:top">${label}</td>
+    <td style="padding:8px 0;border-bottom:1px solid #d9c9a8">${valueHtml}</td>
+  </tr>`;
 }
 
 function safeJson(text) {

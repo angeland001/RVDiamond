@@ -14,12 +14,15 @@ export default function Contact() {
 
   // idle | sending | sent | error
   const [status, setStatus] = useState('idle');
+  // Bots submit within milliseconds of page load; the API rejects implausibly fast sends.
+  const [openedAt] = useState(() => Date.now());
 
   async function handleSubmit(e) {
     e.preventDefault();
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form));
     data.marketingOptIn = form.elements.marketingOptIn.checked;
+    data.elapsedMs = Date.now() - openedAt;
 
     setStatus('sending');
     try {

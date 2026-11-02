@@ -5,7 +5,7 @@
 //
 // Manual send (e.g. to test):  GET /api/seasonal?campaign=summer-ac
 // with header  Authorization: Bearer <CRON_SECRET>
-import { env, BRAND, resend, escapeHtml, layout } from './_email.js';
+import { env, BRAND, resend, escapeHtml, htmlToText, layout } from './_email.js';
 import { CAMPAIGNS } from './_campaigns.js';
 
 export default async function handler(req, res) {
@@ -44,6 +44,7 @@ export default async function handler(req, res) {
       subject: campaign.subject,
       name: `${campaign.id}-${new Date().getFullYear()}`,
       html,
+      text: htmlToText(html),
       send: true,
     });
     return res.status(200).json({ sent: true, campaign: campaign.id, broadcast: broadcast.id });
