@@ -5,7 +5,7 @@
 //
 // Manual send (e.g. to test):  GET /api/seasonal?campaign=summer-ac
 // with header  Authorization: Bearer <CRON_SECRET>
-import { env, BRAND, resend, escapeHtml, htmlToText, layout } from './_email.js';
+import { env, BRAND, resend, escapeHtml, htmlToText, layout, eyebrow, heading } from './_email.js';
 import { CAMPAIGNS } from './_campaigns.js';
 
 export default async function handler(req, res) {
@@ -31,11 +31,19 @@ export default async function handler(req, res) {
     <a href="{{{RESEND_UNSUBSCRIBE_URL}}}" style="color:#8a3614">Unsubscribe</a> — one click, no login required.`;
 
   const html = layout(`
-    <div style="display:none;max-height:0;overflow:hidden">${escapeHtml(campaign.preview)}</div>
-    ${campaign.body}
-    <p style="margin:20px 0 0"><a href="tel:${BRAND.tel}" style="display:inline-block;background:#b14a1f;color:#faf3e2;text-decoration:none;font-weight:bold;padding:12px 20px">Call ${BRAND.phone}</a></p>
-    <p style="font-size:13px;color:#5a4634">Mon–Fri, 9 am – 5 pm. Weekend and after-5 pm emergency calls carry a $250 emergency fee.</p>`,
-    footer);
+    ${eyebrow(campaign.eyebrow)}
+    ${heading(campaign.heading)}
+    ${campaign.body}`,
+    footer,
+    {
+      preview: campaign.preview,
+      hero: campaign.hero,
+      strip: true,
+      cta: {
+        title: 'Want Stag on the job?',
+        note: 'Weekend and after-5 pm emergency calls carry a $250 emergency fee.',
+      },
+    });
 
   try {
     const broadcast = await resend('/broadcasts', {

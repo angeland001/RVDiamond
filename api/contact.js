@@ -3,7 +3,7 @@
 //  2. Sends the customer a transactional confirmation.
 //  3. If (and only if) the customer ticked the opt-in box, adds them to the
 //     marketing segment that the seasonal campaigns in /api/seasonal send to.
-import { env, BRAND, resend, escapeHtml, htmlToText, layout } from './_email.js';
+import { env, BRAND, COLOR, resend, escapeHtml, htmlToText, layout, eyebrow, heading, buttons } from './_email.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_LEN = { name: 120, phone: 40, email: 254, city: 120, service: 80, message: 4000 };
@@ -49,18 +49,22 @@ export default async function handler(req, res) {
     // 1. Notify the business. Reply-To lets staff answer the customer directly.
     //    The consent line doubles as a record of when and where opt-in happened.
     const staffHtml = layout(`
-        <h2 style="margin:0 0 4px;font-size:22px">New service request</h2>
-        <p style="margin:0 0 18px;font-size:13px;color:#5a4634">Received ${escapeHtml(receivedAt)} (Central) · Reply to this email to answer the customer.</p>
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:15px">
-          ${row('Name', escapeHtml(f.name))}
-          ${row('Phone', `<a href="${escapeHtml(telHref)}" style="color:#8a3614">${escapeHtml(f.phone)}</a>`)}
-          ${row('Email', `<a href="mailto:${escapeHtml(f.email)}" style="color:#8a3614">${escapeHtml(f.email)}</a>`)}
+        ${eyebrow('New service request')}
+        ${heading(escapeHtml(f.name))}
+        <p style="margin:0 0 18px;font-size:13px;color:${COLOR.inkSoft}">Received ${escapeHtml(receivedAt)} (Central) · Reply to this email to answer the customer.</p>
+        ${buttons([
+          { label: 'Call customer', href: escapeHtml(telHref) },
+          { label: 'Email customer', href: `mailto:${escapeHtml(f.email)}`, tone: 'ghost' },
+        ])}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:15px;margin-top:20px">
+          ${row('Phone', `<a href="${escapeHtml(telHref)}" style="color:${COLOR.rustDeep}">${escapeHtml(f.phone)}</a>`)}
+          ${row('Email', `<a href="mailto:${escapeHtml(f.email)}" style="color:${COLOR.rustDeep}">${escapeHtml(f.email)}</a>`)}
           ${row('City', escapeHtml(f.city || '—'))}
           ${row('Service', escapeHtml(f.service || '—'))}
         </table>
         <h3 style="margin:20px 0 6px;font-size:16px">Details</h3>
-        <p style="margin:0;padding:12px 14px;background:#f1e7d1;border-left:3px solid #b14a1f;white-space:pre-wrap">${escapeHtml(f.message || '—')}</p>
-        <p style="margin:18px 0 0;font-size:13px;color:#5a4634"><strong>Marketing opt-in:</strong> ${optIn
+        <p style="margin:0;padding:12px 14px;background:${COLOR.cream};border-left:3px solid ${COLOR.rust};white-space:pre-wrap">${escapeHtml(f.message || '—')}</p>
+        <p style="margin:18px 0 0;font-size:13px;color:${COLOR.inkSoft}"><strong>Marketing opt-in:</strong> ${optIn
           ? `YES — checked on the website contact form at ${consentAt}${ip ? ` from IP ${escapeHtml(ip)}` : ''}`
           : 'No'}</p>`,
         'Internal notification from the website contact form.');
@@ -76,12 +80,24 @@ export default async function handler(req, res) {
 
     // 2. Transactional confirmation to the customer (no promotional content).
     const customerHtml = layout(`
-        <p>Hi ${escapeHtml(f.name.split(' ')[0])},</p>
-        <p>Thanks for reaching out to ${BRAND.name}. We've received your request${f.service ? ` for <strong>${escapeHtml(f.service)}</strong>` : ''} and our team will contact you the same business day (Mon–Fri, 9 am – 5 pm).</p>
-        <p>Need us sooner? Call or text <a href="tel:${BRAND.tel}" style="color:#8a3614">${BRAND.phone}</a>.
-        <strong>Weekend and after-5 pm emergency calls carry a $250 emergency fee.</strong></p>
-        ${optIn ? '<p style="font-size:14px;color:#5a4634">You also chose to receive seasonal maintenance reminders and specials. Every one of those emails includes a one-click unsubscribe link.</p>' : ''}`,
-        `You're receiving this one-time message because you submitted a service request on our website.<br>${BRAND.name}${env.postalAddress ? ` · ${escapeHtml(env.postalAddress)}` : ''}`);
+        ${eyebrow('Request received')}
+        ${heading(`Thanks, ${escapeHtml(f.name.split(' ')[0])}. We've got it.`)}
+        <p style="margin:0 0 20px">We've received your request${f.service ? ` for <strong>${escapeHtml(f.service)}</strong>` : ''}. Here's what happens next:</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+          ${step(1, 'Our team reviews your request.')}
+          ${step(2, 'We contact you the same business day (Mon–Fri, 9 am – 5 pm).')}
+          ${step(3, 'We set a time and come to you. No tow.')}
+        </table>
+        ${optIn ? `<p style="margin:18px 0 0;font-size:14px;color:${COLOR.inkSoft}">You also chose to receive seasonal maintenance reminders and specials. Every one of those emails includes a one-click unsubscribe link.</p>` : ''}`,
+        `You're receiving this one-time message because you submitted a service request on our website.<br>${BRAND.name}${env.postalAddress ? ` · ${escapeHtml(env.postalAddress)}` : ''}`,
+        {
+          preview: `We've received your request and will contact you the same business day.`,
+          hero: { file: 'hero-confirmation.jpg', alt: 'Illustration of a vintage travel trailer' },
+          cta: {
+            title: 'Need us sooner?',
+            note: 'Call or text us. Weekend and after-5 pm emergency calls carry a $250 emergency fee.',
+          },
+        });
 
     await resend('/emails', {
       from: env.from,
@@ -118,8 +134,15 @@ export default async function handler(req, res) {
 
 function row(label, valueHtml) {
   return `<tr>
-    <td style="padding:8px 12px 8px 0;border-bottom:1px solid #d9c9a8;width:90px;font-weight:bold;vertical-align:top">${label}</td>
-    <td style="padding:8px 0;border-bottom:1px solid #d9c9a8">${valueHtml}</td>
+    <td style="padding:8px 12px 8px 0;border-bottom:1px solid ${COLOR.rule};width:90px;font-weight:bold;vertical-align:top">${label}</td>
+    <td data-value style="padding:8px 0;border-bottom:1px solid ${COLOR.rule}">${valueHtml}</td>
+  </tr>`;
+}
+
+function step(number, text) {
+  return `<tr>
+    <td width="44" style="width:44px;padding:0 0 12px;vertical-align:top"><span style="display:inline-block;width:30px;line-height:30px;background:${COLOR.ink};color:${COLOR.cream};font-size:14px;font-weight:bold;text-align:center">${number}</span></td>
+    <td data-value style="padding:4px 0 12px;vertical-align:top">${text}</td>
   </tr>`;
 }
 
