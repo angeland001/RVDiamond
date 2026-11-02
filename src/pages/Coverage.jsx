@@ -6,9 +6,8 @@ import { usePageMeta } from '../hooks/usePageMeta';
 import { SITE } from '../config/site';
 import { getConsent, setConsent, onConsentChange } from '../lib/consent';
 
-const HQ = { lat: 35.0723, lng: -91.8837 };
-
 const LOCATIONS = [
+  { label: 'Beebe',             lat: 35.0723, lng: -91.8837 },
   { label: 'Cabot',             lat: 34.9748, lng: -92.0171 },
   { label: 'Little Rock',       lat: 34.7465, lng: -92.2896 },
   { label: 'Searcy',            lat: 35.2506, lng: -91.7368 },
@@ -42,31 +41,10 @@ const MAP_STYLES = [
   { featureType: 'water',          elementType: 'labels.text.fill',          stylers: [{ color: '#6b4e37' }] },
 ];
 
-const HQ_PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="38" height="50" viewBox="0 0 38 50" style="display:block">
-  <path d="M19 2C9.6 2 2 9.6 2 19c0 13.5 17 29 17 29s17-15.5 17-29C36 9.6 28.4 2 19 2z" fill="#b14a1f" stroke="#8a3614" stroke-width="2"/>
-  <circle cx="19" cy="19" r="10" fill="#8a3614"/>
-  <text x="19" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="13" font-weight="bold" fill="#f1e7d1">S</text>
-</svg>`;
-
 const TOWN_PIN_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="30" viewBox="0 0 22 30" style="display:block">
   <path d="M11 1C5.5 1 1 5.5 1 11c0 9 10 18 10 18S21 20 21 11C21 5.5 16.5 1 11 1z" fill="#e8dcc0" stroke="#b08a5b" stroke-width="1"/>
   <circle cx="11" cy="11" r="4.5" fill="#b14a1f"/>
 </svg>`;
-
-function fmtMiles(meters) {
-  const mi = meters * 0.000621371;
-  return (mi < 10 ? mi.toFixed(1) : Math.round(mi)) + ' mi';
-}
-
-function fmtDuration(dur) {
-  let secs = 0;
-  if (typeof dur === 'number') secs = dur;
-  else if (typeof dur === 'string') secs = parseInt(dur, 10);
-  else if (dur?.seconds != null) secs = Number(dur.seconds);
-  const h = Math.floor(secs / 3600);
-  const m = Math.round((secs % 3600) / 60);
-  return h > 0 ? `${h} hr ${m} min` : `${m} min`;
-}
 
 function iwTemplate(title, body) {
   return `<div class="mw-wrap">
@@ -90,7 +68,7 @@ export default function Coverage() {
 
   usePageMeta(
     'Service Area — Stag: Mobile RV Tech | Beebe, Cabot, Little Rock & More',
-    'Mobile RV repair within an hour of Beebe, AR: Cabot, Searcy, Jacksonville, Little Rock, North Little Rock, Lonoke, Vilonia and Ward.'
+    'Mobile RV repair across central Arkansas: Beebe, Cabot, Searcy, Jacksonville, Little Rock, North Little Rock, Lonoke, Vilonia and Ward.'
   );
 
   // Google Maps can set third-party cookies, so it only loads after consent.
@@ -132,7 +110,6 @@ export default function Coverage() {
           .mw-title{font-family:'Alfa Slab One',serif;font-size:17px;color:#f1e7d1;margin:0 0 10px;line-height:1.15}
           .mw-stats{display:flex;align-items:center;gap:10px;margin-bottom:12px}
           .mw-stat{flex:1}
-          .mw-divider{width:1px;height:34px;background:rgba(241,231,209,.15);flex-shrink:0}
           .mw-value{font-size:14px;font-weight:700;color:#f1e7d1;white-space:nowrap}
           .mw-unit{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#b08a5b;margin-top:2px}
           .mw-cta{display:flex;align-items:center;gap:7px;justify-content:center;background:#b14a1f;color:#f1e7d1;text-decoration:none;padding:9px 14px;border-radius:2px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:background .1s}
@@ -200,37 +177,14 @@ export default function Coverage() {
         if (hint) { hint.style.opacity = '0'; hint.style.pointerEvents = 'none'; }
       }
 
-      new MapPin({
-        position: HQ, svg: HQ_PIN_SVG, anchorX: 19, anchorY: 50, zIndex: 10,
-        onClick: () => {
-          iw.setContent(iwTemplate('Beebe, AR &mdash; HQ', `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value" style="color:#d96a35">Headquarters</div><div class="mw-unit">Mobile RV Tech · Est. '14</div></div></div>`));
-          iw.setPosition(HQ); iw.open(map); dismissHint();
-        },
-      }).setMap(map);
-      bounds.extend(HQ);
-
       LOCATIONS.forEach(loc => {
         const pos = { lat: loc.lat, lng: loc.lng };
         bounds.extend(pos);
         new MapPin({
           position: pos, svg: TOWN_PIN_SVG, anchorX: 11, anchorY: 30,
-          onClick: async () => {
-            iw.setContent(iwTemplate(loc.label, `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value" style="font-size:12px;opacity:.6">Calculating route…</div></div></div>`));
+          onClick: () => {
+            iw.setContent(iwTemplate(loc.label, `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value">Same-day or next-day</div><div class="mw-unit">On most calls</div></div></div>`));
             iw.setPosition(pos); iw.open(map); dismissHint();
-            try {
-              const resp = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': apiKey, 'X-Goog-FieldMask': 'routes.legs.distanceMeters,routes.legs.duration' },
-                body: JSON.stringify({ origin: { location: { latLng: { latitude: HQ.lat, longitude: HQ.lng } } }, destination: { location: { latLng: { latitude: pos.lat, longitude: pos.lng } } }, travelMode: 'DRIVE' }),
-              });
-              const data = await resp.json();
-              const leg = data.routes?.[0]?.legs?.[0];
-              if (leg?.distanceMeters) {
-                iw.setContent(iwTemplate(loc.label, `<div class="mw-stats"><div class="mw-stat"><div class="mw-value">${fmtDuration(leg.duration)}</div><div class="mw-unit">Drive Time</div></div><div class="mw-divider"></div><div class="mw-stat"><div class="mw-value">${fmtMiles(leg.distanceMeters)}</div><div class="mw-unit">From Beebe</div></div></div>`));
-              } else {
-                iw.setContent(iwTemplate(loc.label, `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value" style="font-size:12px;opacity:.6">Couldn't load route.</div></div></div>`));
-              }
-            } catch { iw.setContent(iwTemplate(loc.label, `<div class="mw-stats"><div class="mw-stat" style="flex:1;text-align:center"><div class="mw-value" style="font-size:12px;opacity:.6">Couldn't load route.</div></div></div>`)); }
           },
         }).setMap(map);
       });
@@ -263,11 +217,11 @@ export default function Coverage() {
           <div>
             <div className="section-head reveal" ref={headReveal}>
               <span className="eyebrow">Where we roll</span>
-              <h1 id="area-heading">One hour of Beebe.</h1>
+              <h1 id="area-heading">Service Area</h1>
               <p>We keep a tight service radius so our techs can be there same-day or next-day on most calls. If you're in any of these towns, you're on the map.</p>
             </div>
             <ul className="area-towns reveal" ref={townsReveal} aria-label="Towns served">
-              <li className="home-town">Beebe · HQ</li>
+              <li>Beebe</li>
               <li>Cabot</li>
               <li>Jacksonville</li>
               <li>Little Rock</li>
@@ -280,7 +234,7 @@ export default function Coverage() {
             <p className="area-note">→ Outside the circle? Call anyway — travel fee may apply.</p>
           </div>
 
-          <div className="area-map reveal" ref={areaReveal} role="region" aria-label="Interactive service area map — click any town to see drive time from Beebe">
+          <div className="area-map reveal" ref={areaReveal} role="region" aria-label="Interactive service area map — click any town for service details">
             <div id="coverage-map" ref={mapRef} hidden={mapError}></div>
             {mapsAllowed && mapError && (
               <div className="map-consent" role="status">
@@ -300,7 +254,7 @@ export default function Coverage() {
                 <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7z" />
                 <circle cx="12" cy="9" r="2.5" fill="currentColor" stroke="none" />
               </svg>
-              Click any town to see drive time
+              Click any town for service details
             </div>
           </div>
         </div>

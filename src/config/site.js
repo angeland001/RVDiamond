@@ -5,9 +5,9 @@ export const SITE = {
   shortName:  'Stag',
   tagline:    'Mobile RV Repair · Central Arkansas',
   founded:    2014,
-  phone:      '(501) 555-0199',
-  phoneHref:  'tel:+15015550199',
-  smsHref:    'sms:+15015550199',
+  phone:      '(501) 466-7786',
+  phoneHref:  'tel:+15014667786',
+  smsHref:    'sms:+15014667786',
   // Stored in two parts so scrapers can't regex the full address; render it with <EmailLink />.
   emailUser:   'Staffinfo',
   emailDomain: 'stagmobilervtech.com',

@@ -209,7 +209,7 @@ export default function Home() {
       <section className="hero" aria-label="Introduction">
         <div className="hero-inner">
           <div className="hero-copy">
-            <span className="eyebrow">Beebe, Arkansas · Mobile Service</span>
+            <span className="eyebrow">Central Arkansas · Mobile Service</span>
             <h2 className="hero-headline display">
               Your RV <span className="underline-mark">won't fix itself.</span><br />
               <span className="accent-text">We come to you.</span>

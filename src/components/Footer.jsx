@@ -37,7 +37,7 @@ export default function Footer() {
           <div className="footer-rows">
             <a href={SITE.phoneHref}>{SITE.phone} · call or text</a>
             <EmailLink />
-            <p>Headquartered in Beebe, AR</p>
+            <p>Serving central Arkansas</p>
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export default function Footer() {
 
       {/* Fineprint */}
       <div className="footer-fineprint">
-        <span>© {year} {SITE.name} · Beebe, AR</span>
+        <span>© {year} {SITE.name} · Central Arkansas</span>
         <span className="footer-fineprint-dot" aria-hidden="true">◆</span>
         <span>Independent · Not affiliated with any dealer or manufacturer</span>
         <span className="footer-fineprint-dot" aria-hidden="true">◆</span>

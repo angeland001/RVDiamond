@@ -87,7 +87,7 @@ export default function Contact() {
             </span>
             <div>
               <span className="label">Service Area</span>
-              <p>Headquartered in Beebe, AR · Mobile across central Arkansas</p>
+              <p>Mobile across central Arkansas</p>
             </div>
           </div>
 

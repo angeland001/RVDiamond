@@ -210,7 +210,7 @@ export default function Services() {
         <div className="services-intro">
           <div className="section-head reveal" ref={headRef}>
             <span className="eyebrow">What we fix</span>
-            <h1 id="services-heading">Six things, done right.</h1>
+            <h1 id="services-heading">Get Things Done Right</h1>
             <p>We're not generalists with a tool belt. Every service below is something our technicians handle every week, with the parts and diagnostic gear on the truck to finish in one visit.</p>
           </div>
         </div>

@@ -12,8 +12,8 @@ export const env = {
 
 export const BRAND = {
   name:  'Stag: Mobile RV Tech',
-  phone: '(501) 555-0199',
-  tel:   '+15015550199',
+  phone: '(501) 466-7786',
+  tel:   '+15014667786',
 };
 
 export async function resend(path, body, method = 'POST') {
