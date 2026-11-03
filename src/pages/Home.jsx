@@ -1,5 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import ScrollGlobe from '../components/ScrollGlobe';
+import SplitText from '../components/SplitText';
 import GlareHover from '../components/GlareHover';
 import ClickSpark from '../components/ClickSpark';
 import BannerCar from '../components/BannerCar';
@@ -23,11 +24,183 @@ const PhoneIcon = () => (
 const MARQUEE_ITEMS = ['HVAC repair', 'Plumbing', 'Electrical', 'Winterizing', 'De-winterizing', 'Pre-purchase inspection', 'Mobile service'];
 
 export default function Home() {
+  const canvasRef    = useRef(null);
+  const runwayRef    = useRef(null);
+  const scrollRoot   = useRef(null);
+  const loaderRef    = useRef(null);
+
   usePageMeta();
+
+  // Video-scrub scroll animation — single 0.67 MB MP4 instead of 121 separate images
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const runway = runwayRef.current;
+    const root   = scrollRoot.current;
+    const loader = loaderRef.current;
+    if (!canvas || !runway) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root?.style.setProperty('--p', '1');
+      loader?.remove();
+      return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    let alive      = true;
+    let rafPending = false;
+    let canvasW    = 0;
+    let canvasH    = 0;
+    let dpr        = 1;
+    let lastP      = -1;
+
+    const video = document.createElement('video');
+    video.muted       = true;
+    video.playsInline = true;
+    video.preload     = 'auto';
+    video.src         = '/assets/rv-animation.mp4';
+
+    function resizeCanvas() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const container = canvas.parentElement;
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (!w || !h) return;
+      canvasW = w; canvasH = h;
+      canvas.width  = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      canvas.style.width  = w + 'px';
+      canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'medium';
+      drawCurrentFrame();
+    }
+
+    function drawCurrentFrame() {
+      if (!video.readyState || !canvasW || !canvasH) return;
+      const vw = video.videoWidth, vh = video.videoHeight;
+      if (!vw || !vh) return;
+      ctx.clearRect(0, 0, canvasW, canvasH);
+      const scale = Math.max(canvasW / vw, canvasH / vh);
+      const dx = (canvasW - vw * scale) / 2;
+      const dy = (canvasH - vh * scale) / 2;
+      ctx.drawImage(video, dx, dy, vw * scale, vh * scale);
+    }
+
+    function onScroll() {
+      if (!rafPending && alive) { rafPending = true; requestAnimationFrame(tick); }
+    }
+
+    function tick() {
+      rafPending = false;
+      if (!alive) return;
+      const rect      = runway.getBoundingClientRect();
+      const viewH     = window.innerHeight;
+      const scrubable = Math.max(1, rect.height - viewH);
+      const scrollY   = window.pageYOffset || document.documentElement.scrollTop;
+      const progress  = Math.min(scrubable, scrollY) / scrubable;
+      if (root && Math.abs(progress - lastP) > 0.002) {
+        root.style.setProperty('--p', progress.toFixed(4));
+        lastP = progress;
+      }
+      if (video.duration) {
+        // Cap 1 frame before end so the browser never fires the 'ended' event
+        video.currentTime = Math.min(progress * video.duration, video.duration - 0.034);
+      }
+    }
+
+    // With all-keyframe video, seeked fires near-instantly — draw only here to avoid
+    // the stale-frame flash that happens when drawing before the seek resolves
+    video.addEventListener('seeked', () => { if (alive) drawCurrentFrame(); });
+
+    function startAfterLoad() {
+      if (!alive) return;
+      // Play/pause to unlock canvas drawing on Safari iOS
+      video.play().then(() => { video.pause(); video.currentTime = 0; }).catch(() => {});
+      resizeCanvas();
+      if (loader) {
+        loader.dataset.state = 'done';
+        setTimeout(() => { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 400);
+      }
+      document.body.classList.remove('canvas-loading');
+      window.addEventListener('resize', resizeCanvas, { passive: true });
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+    }
+
+    video.addEventListener('canplaythrough', startAfterLoad, { once: true });
+    // Fallback: start as soon as first frame is available if canplaythrough is slow
+    video.addEventListener('loadeddata', () => {
+      if (!alive) return;
+      resizeCanvas(); // show first frame right away
+    }, { once: true });
+
+    document.body.classList.add('canvas-loading');
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const container = canvas.parentElement;
+    const w = container.clientWidth || 980;
+    const h = container.clientHeight || Math.round(980 * 9 / 16);
+    canvas.width  = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    return () => {
+      alive = false;
+      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('scroll', onScroll);
+      document.body.classList.remove('canvas-loading');
+      // Release the video without setting src='' (Firefox logs "Invalid URI" for empty src)
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+    };
+  }, []);
 
   return (
     <>
-      <ScrollGlobe />
+      {/* ── Scroll animation ── */}
+      <section className="scroll-anim" ref={scrollRoot} aria-label="From call received to fixed on site">
+        <div className="scroll-anim-runway" ref={runwayRef}>
+          <div className="scroll-anim-sticky">
+            <canvas id="scroll-canvas" ref={canvasRef} aria-hidden="true" />
+            <div
+              className="scroll-canvas-loader"
+              id="scroll-canvas-loader"
+              ref={loaderRef}
+              role="status"
+              aria-live="polite"
+            >
+              <div className="scroll-canvas-loader-track">
+                <div className="scroll-canvas-loader-bar" id="scroll-canvas-loader-bar" />
+              </div>
+            </div>
+            <div className="scroll-anim-overlay" aria-hidden="true" />
+
+            <div className="scroll-anim-stage">
+              <span className="scroll-anim-eyebrow">Mobile RV Repair · Central Arkansas</span>
+              <h1 className="scroll-anim-title display" aria-label="RV down? We fix it on-site.">
+                <SplitText text="RV down?" delay={120} duration={1.4} startIndex={0} />
+                {' '}
+                <span className="accent" aria-hidden="true">
+                  <SplitText text="We fix it on-site." delay={120} duration={1.4} startIndex={7} />
+                </span>
+              </h1>
+              <p className="scroll-anim-sub" aria-label="One call. Certified techs. Same day. No tow.">
+                <SplitText text="One call. Certified techs. Same day. No tow." delay={120} duration={1.4} />
+              </p>
+            </div>
+
+            <span className="scroll-anim-hint" aria-hidden="true">
+              Keep scrolling
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </span>
+          </div>
+        </div>
+      </section>
 
       {/* ── Hero ── */}
       <section className="hero" aria-label="Introduction">

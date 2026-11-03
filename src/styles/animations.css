@@ -143,48 +143,46 @@
   .reveal { opacity: 1; transform: none; transition: none; }
 }
 
-/* ════════════════════════ SCROLL GLOBE ════════════════════════ */
-.scroll-globe-scene {
+/* ════════════════════════ SCROLL CANVAS ════════════════════════ */
+.canvas-loading { overflow: hidden; }
+
+#scroll-canvas {
   position: absolute;
   inset: 0;
   z-index: 0;
-}
-.scroll-globe-gl,
-.scroll-globe-gl canvas,
-.scroll-globe-map {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
+  filter: brightness(1.08) contrast(1.04) saturate(1.05);
 }
-.scroll-globe-caption {
+
+.scroll-canvas-loader {
   position: absolute;
-  left: 50%;
-  bottom: clamp(16px, 4vh, 40px);
-  z-index: 2;
-  width: min(100% - 32px, 62ch);
-  transform: translateX(-50%);
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  text-align: center;
-  opacity: var(--reveal, 0);
-  visibility: hidden;
+  inset: 0;
+  background: var(--ink-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: opacity 0.35s var(--ease-out);
 }
-.scroll-globe-caption p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.5;
-  color: var(--cream-2);
+.scroll-canvas-loader[data-state="done"] {
+  opacity: 0;
+  pointer-events: none;
 }
-.scroll-globe-caption a {
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--cream);
-  text-decoration: underline;
-  text-decoration-color: var(--teal);
-  text-underline-offset: 3px;
+.scroll-canvas-loader-track {
+  width: 120px;
+  height: 2px;
+  background: rgba(241, 231, 209, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.scroll-canvas-loader-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent-glow);
+  border-radius: 1px;
+  transition: width 0.15s ease;
 }
 
 /* ════════════════════════ SCROLL ANIMATION ════════════════════════ */
@@ -193,7 +191,7 @@
   width: 100%;
 }
 .scroll-anim-runway {
-  height: 400vh;
+  height: 300vh;
   position: relative;
 }
 .scroll-anim-sticky {
@@ -208,20 +206,26 @@
   color: var(--cream);
   overflow: hidden;
 }
+.scroll-anim-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(60% 50% at 50% 20%, rgba(217, 106, 53, .08) 0%, transparent 70%),
+    rgba(31, 22, 16, calc(0.12 + var(--p, 0) * 0.2));
+  pointer-events: none;
+}
 
 .scroll-anim-stage {
   position: relative;
   z-index: 2;
-  align-self: start;
   width: 100%;
   max-width: 1200px;
-  padding: calc(var(--nav-h-tall) + clamp(8px, 3vh, 32px)) 16px 0;
+  padding: 0 16px;
   display: grid;
   gap: 18px;
   place-items: center;
   text-align: center;
-  opacity: calc(1 - var(--p, 0) * 5);
-  transform: translateY(calc(var(--p, 0) * -60px));
 }
 
 .scroll-anim-eyebrow {
@@ -230,6 +234,8 @@
   letter-spacing: .22em;
   text-transform: uppercase;
   color: var(--teal);
+  opacity: calc(1 - var(--p, 0) * .5);
+  transition: opacity .1s linear;
 }
 .scroll-anim-title {
   font-family: var(--font-display);
@@ -302,27 +308,11 @@
   50%      { transform: translateY(4px); opacity: 1; }
 }
 
-/* Clear the fixed call bar on phones. */
-@media (max-width: 719px) {
-  .scroll-globe-caption,
-  .scroll-anim-hint { bottom: calc(79px + env(safe-area-inset-bottom, 0px)); }
-  .scroll-globe-caption p { font-size: 14px; }
-}
-
-/* No motion or no WebGL: headline, then the finished map, then the caption. */
-.scroll-anim--static .scroll-anim-runway { height: auto; }
-.scroll-anim--static .scroll-anim-sticky {
-  position: static;
-  height: auto;
-  display: block;
-  padding-bottom: 40px;
-}
-.scroll-anim--static .scroll-anim-stage { margin: 0 auto; opacity: 1; transform: none; }
-.scroll-anim--static .scroll-globe-scene { position: relative; inset: auto; height: min(70vh, 560px); margin-top: 16px; }
-.scroll-anim--static .scroll-globe-caption { position: static; transform: none; margin: 16px auto 0; opacity: 1; visibility: visible !important; }
-.scroll-anim--static .scroll-anim-hint { display: none; }
 @media (prefers-reduced-motion: reduce) {
+  .scroll-anim-runway { height: auto; }
+  .scroll-anim-sticky { position: static; height: auto; padding: 56px 16px; min-height: 60vh; }
   .scroll-anim-hint svg { animation: none; }
+  .scroll-anim-hint { display: none; }
 }
 
 /* ════════════════════════ CARD ILLUSTRATIONS ════════════════════════ */
