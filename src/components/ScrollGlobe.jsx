@@ -2,9 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import createGlobe from 'cobe';
 import SplitText from './SplitText';
-import { SERVICE_TOWNS } from '../lib/serviceArea';
-import { getConsent, onConsentChange } from '../lib/consent';
-import { MAP_STYLES, loadGoogleMaps, onMapsAuthFailure } from '../lib/googleMaps';
+import { SERVICE_TOWNS, SERVICE_AREA_BUFFER_MILES, serviceAreaPath } from '../lib/serviceArea';
 
 const RAD = Math.PI / 180;
 const STATE_CENTER = { lat: 34.75, lng: -92.13 };
@@ -12,25 +10,19 @@ const STATE_WIDTH_RAD = 0.0714;  // Arkansas on a unit sphere, used to size the 
 const STATE_HEIGHT_RAD = 0.0611;
 const GLOBE_RADIUS = 0.8;        // cobe draws the globe at this fraction of half the canvas height at scale 1
 const MAX_GLOBE_PIXELS = 3e6;
+const US_CENTER = { lat: 38.5, lng: -97 };
+const RV_COUNT = 26;
 const PIN_HEAD_Y = -19; // center of the pin's head, measured up from its tip
-const COS_LAT = Math.cos(STATE_CENTER.lat * RAD); // Mercator matches the globe's scale at the state's center with this factor
-const TILE_PX_PER_RAD = 256 / (2 * Math.PI);      // Google's world size at zoom 0
-const MAP_LOAD_AT = 0.01; // loads on the first scroll, so it's ready early but visitors who never scroll don't pay for one
 
-// The service towns plus nearby spots, so the pins scatter around central Arkansas instead of clustering.
-const MAP_PINS = [
-  ...SERVICE_TOWNS,
-  { lat: 35.0887, lng: -92.4421 }, // Conway
-  { lat: 34.9568, lng: -92.4274 }, // Mayflower
-  { lat: 35.2337, lng: -92.3874 }, // Greenbrier
-  { lat: 35.2165, lng: -92.0757 }, // Romance
-  { lat: 35.2320, lng: -91.6682 }, // Kensett
-  { lat: 35.1132, lng: -91.8224 }, // McRae
-  { lat: 34.7834, lng: -91.7471 }, // Carlisle
-  { lat: 34.5440, lng: -91.9690 }, // England
-  { lat: 34.6932, lng: -92.0965 }, // Scott
-  { lat: 34.5959, lng: -92.4890 }, // Bryant
-];
+// Each RV circles the country on its own ellipse, spaced evenly around the swirl.
+const RVS = Array.from({ length: RV_COUNT }, (_, i) => ({
+  start: (i / RV_COUNT) * Math.PI * 2 * 3,
+  orbit: 0.3 + 0.7 * ((i * 7) % RV_COUNT) / (RV_COUNT - 1),
+  speed: 0.1 + 0.07 * ((i * 11) % 5) / 4,
+}));
+
+// Which side of the map each town's label sits on, so the tight cluster stays readable.
+const LEFT_LABELS = new Set(['Vilonia', 'North Little Rock', 'Little Rock']);
 
 const clamp01 = v => Math.min(1, Math.max(0, v));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -38,11 +30,28 @@ const smooth = (from, to, v) => {
   const t = clamp01((v - from) / (to - from));
   return t * t * (3 - 2 * t);
 };
-const mercatorY = lat => Math.log(Math.tan(Math.PI / 4 + (lat * RAD) / 2));
-const mercatorLat = y => (2 * Math.atan(Math.exp(y)) - Math.PI / 2) / RAD;
 
 // The same teardrop as the Coverage map's town pins, with its tip at (0, 0).
 const PIN_SHAPE = new Path2D('M0 -29C-5.5 -29 -10 -24.5 -10 -19C-10 -10 0 -1 0 -1S10 -10 10 -19C10 -24.5 5.5 -29 0 -29Z');
+const RV_BODY = new Path2D('M-13 4V-6a1 1 0 0 1 1-1H9a2 2 0 0 1 2 2V-3H9L13 1V4Z');
+const RV_GLASS = new Path2D('M9.2-2.5 11.6 0.2H7.5V-2.5ZM-9.5-4.5H-4.5V-1.5H-9.5ZM-1-4.5H4V-1.5H-1Z');
+
+// A side-on motorhome facing +x, about 26 units long and centered on (0, 0).
+function drawRv(ctx) {
+  ctx.fillStyle = '#f1e7d1';
+  ctx.strokeStyle = '#1f1610';
+  ctx.lineWidth = 1.2;
+  ctx.fill(RV_BODY);
+  ctx.stroke(RV_BODY);
+  ctx.fillStyle = '#d96a35';
+  ctx.fillRect(-12.4, 0, 25, 1.6);
+  ctx.fillStyle = '#1f1610';
+  ctx.fill(RV_GLASS);
+  ctx.beginPath();
+  ctx.arc(-7, 4, 2.3, 0, Math.PI * 2);
+  ctx.arc(7, 4, 2.3, 0, Math.PI * 2);
+  ctx.fill();
+}
 
 function supportsWebGL() {
   const probe = document.createElement('canvas');
@@ -55,7 +64,6 @@ export default function ScrollGlobe() {
   const stageRef   = useRef(null);
   const sceneRef   = useRef(null);
   const globeRef   = useRef(null);
-  const googleRef  = useRef(null);
   const mapRef     = useRef(null);
   const captionRef = useRef(null);
 
@@ -64,7 +72,6 @@ export default function ScrollGlobe() {
     const runway = runwayRef.current;
     const scene = sceneRef.current;
     const globeHost = globeRef.current;
-    const googleHost = googleRef.current;
     const mapCanvas = mapRef.current;
     const caption = captionRef.current;
     if (!root || !runway || !scene || !mapCanvas) return;
@@ -74,6 +81,7 @@ export default function ScrollGlobe() {
     root.classList.toggle('scroll-anim--static', isStatic);
 
     const ctx = mapCanvas.getContext('2d');
+    const areaPath = serviceAreaPath(SERVICE_TOWNS, SERVICE_AREA_BUFFER_MILES);
     let statePath = null;
     let alive = true;
     let raf = 0;
@@ -89,80 +97,6 @@ export default function ScrollGlobe() {
 
     let glCanvas = null;
     let globe = null;
-
-    // A fresh element per effect run: StrictMode runs effects twice, and a second Map
-    // on the same div breaks the first one's internal observers.
-    const googleEl = document.createElement('div');
-    googleEl.className = 'scroll-globe-google';
-    googleHost.appendChild(googleEl);
-    let googleMap = null;
-    let mapRequested = false;
-    let mapReady = false;
-    let mapAllowed = getConsent() === 'all'; // Google Maps can set third-party cookies
-    let mapW = 0, mapOriginY = 0, tilePx = 1;
-
-    // Sizes the map so that, at the final zoom, it exactly fills the view with Arkansas
-    // framed like the globe. Google's corner logo and terms have to stay on screen, so
-    // on phones the map stops above the caption and call bar.
-    function placeGoogleMap() {
-      if (!googleMap) return;
-      const viewH = !isStatic && W < 720 && caption ? caption.offsetTop - 8 : H;
-      const finalPx = finalR * COS_LAT;
-      const zoom = Math.round(Math.log2(finalPx / TILE_PX_PER_RAD));
-      tilePx = TILE_PX_PER_RAD * 2 ** zoom;
-      const finalScale = finalPx / tilePx;
-      mapW = Math.ceil(W / finalScale / 2) * 2;
-      mapOriginY = finalY / finalScale;
-      googleEl.style.width = `${mapW}px`;
-      googleEl.style.height = `${Math.ceil(viewH / finalScale / 2) * 2}px`;
-      googleEl.style.transformOrigin = `50% ${mapOriginY}px`;
-      googleMap.setZoom(zoom);
-      googleMap.setCenter({
-        lat: mercatorLat(mercatorY(STATE_CENTER.lat) - (viewH / 2 - finalY) / finalPx),
-        lng: STATE_CENTER.lng,
-      });
-    }
-
-    function requestGoogleMap() {
-      mapRequested = true;
-      loadGoogleMaps()
-        .then(maps => {
-          if (!alive) return;
-          googleMap = new maps.Map(googleEl, {
-            styles: MAP_STYLES,
-            backgroundColor: '#1f1510',
-            disableDefaultUI: true,
-            gestureHandling: 'none',
-            keyboardShortcuts: false,
-            clickableIcons: false,
-          });
-          maps.event.addListenerOnce(googleMap, 'tilesloaded', () => {
-            mapReady = true;
-            redraw();
-          });
-          placeGoogleMap();
-        })
-        .catch(() => { // the drawn state map takes over without it
-          mapAllowed = false;
-          redraw();
-        });
-    }
-
-    // Shows the map as a soft-edged oval around Arkansas, then opens it to the full view as
-    // the camera finishes closing in, so its edges (still inside the view until the zoom
-    // completes) never show as a rectangle.
-    function styleGoogleMap(cam, zoom, fade) {
-      googleEl.style.visibility = fade > 0 ? 'visible' : 'hidden';
-      if (fade <= 0) return;
-      const open = 70 + clamp01((zoom - 0.8) / 0.2) ** 4 * 90;
-      const mask = open < 160
-        ? `radial-gradient(ellipse closest-side at 50% ${mapOriginY}px, #000 ${open}%, transparent ${open + 30}%)`
-        : 'none';
-      googleEl.style.opacity = fade;
-      googleEl.style.webkitMaskImage = mask;
-      googleEl.style.maskImage = mask;
-      googleEl.style.transform = `translate(${W / 2 - mapW / 2}px, ${cam.y - mapOriginY}px) scale(${(cam.R * COS_LAT) / tilePx})`;
-    }
 
     function layout() {
       W = scene.clientWidth;
@@ -184,7 +118,6 @@ export default function ScrollGlobe() {
       finalR = Math.min(W * 0.9 / STATE_WIDTH_RAD, H * fitH / STATE_HEIGHT_RAD);
       finalY = isStatic ? H / 2 : H * 0.46;
       globe?.update({ width: W, height: H });
-      placeGoogleMap();
       dirty = true;
     }
 
@@ -203,18 +136,15 @@ export default function ScrollGlobe() {
 
       const sinP = Math.sin(cam.phi), cosP = Math.cos(cam.phi);
       const sinT = Math.sin(cam.theta), cosT = Math.cos(cam.theta);
-      const mercPx = cam.R * COS_LAT;
-      const centerMercY = mercatorY(STATE_CENTER.lat);
-      // Same projection cobe uses, so everything here stays locked to the globe,
-      // easing into Google's Mercator as its map fades in so it stays locked to that too.
+      // Same projection cobe uses, so everything here stays locked to the globe.
       const project = (lat, lng) => {
         const cosLat = Math.cos(lat * RAD);
         const x = cosLat * Math.cos(lng * RAD);
         const y = Math.sin(lat * RAD);
         const z = -cosLat * Math.sin(lng * RAD);
         return {
-          x: lerp(W / 2 + (cosP * x + sinP * z) * cam.R, W / 2 + (lng - STATE_CENTER.lng) * RAD * mercPx, cam.mapFade),
-          y: lerp(cam.y - (sinP * sinT * x + cosT * y - cosP * sinT * z) * cam.R, cam.y - (mercatorY(lat) - centerMercY) * mercPx, cam.mapFade),
+          x: W / 2 + (cosP * x + sinP * z) * cam.R,
+          y: cam.y - (sinP * sinT * x + cosT * y - cosP * sinT * z) * cam.R,
           depth: -sinP * cosT * x + sinT * y + cosP * cosT * z,
         };
       };
@@ -227,8 +157,7 @@ export default function ScrollGlobe() {
       };
 
       // Beacon that marks the destination while the globe is still far away.
-      const facing = smooth(0.02, 0.2, project(STATE_CENTER.lat, STATE_CENTER.lng).depth);
-      const beaconAlpha = facing * (1 - smooth(0.32, 0.5, zoom));
+      const beaconAlpha = smooth(0.02, 0.2, project(STATE_CENTER.lat, STATE_CENTER.lng).depth) * (1 - smooth(0.32, 0.5, zoom));
       if (beaconAlpha > 0) {
         const c = project(34.95, -92.05);
         const pulse = (now / 1600) % 1;
@@ -238,49 +167,112 @@ export default function ScrollGlobe() {
         ctx.beginPath();
         ctx.arc(c.x, c.y, 5 + pulse * 18, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.globalAlpha = beaconAlpha;
+        ctx.fillStyle = '#d96a35';
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+        ctx.fill();
       }
 
-      if (statePath) {
-        // Arkansas stays solid orange on the globe until the map (or the drawn fallback) takes over.
-        const orangeAlpha = facing * (1 - cam.stateGlow);
-        if (orangeAlpha > 0) {
-          ctx.globalAlpha = orangeAlpha;
+      // Colors match the Coverage map: gray state, with the service area cut out of it.
+      const mapAlpha = smooth(0.2, 0.42, zoom);
+      if (mapAlpha > 0) {
+        ctx.globalAlpha = mapAlpha;
+        if (statePath) {
           ctx.beginPath();
           trace(statePath);
-          ctx.fillStyle = '#d96a35';
+          ctx.fillStyle = '#1f1510'; // hides the globe's dots behind the see-through colors
           ctx.fill();
-        }
 
-        // Then it becomes a glowing outline with a faint orange tint.
-        if (cam.stateGlow > 0) {
-          ctx.globalAlpha = cam.stateGlow * (1 - cam.mapFade);
+          trace(areaPath);
+          ctx.fillStyle = 'rgba(140, 135, 130, .26)';
+          ctx.fill('evenodd');
+
           ctx.beginPath();
           trace(statePath);
-          ctx.fillStyle = '#1f1510'; // hides the globe's dots behind the see-through tint
-          ctx.fill();
-
-          ctx.save();
-          ctx.globalAlpha = cam.stateGlow;
-          ctx.fillStyle = 'rgba(217, 106, 53, .14)';
-          ctx.fill();
-          ctx.strokeStyle = '#ff9a5c';
-          ctx.lineWidth = 2;
-          ctx.lineJoin = 'round';
-          ctx.shadowColor = 'rgba(255, 122, 51, .95)';
-          ctx.shadowBlur = 26 * (mapCanvas.width / W); // canvas shadows ignore the context's scale
+          ctx.strokeStyle = 'rgba(196, 184, 168, .4)';
+          ctx.lineWidth = 1;
           ctx.stroke();
-          ctx.stroke(); // a second pass doubles up the shadow so the glow reads over the map
-          ctx.restore();
         }
+
+        ctx.beginPath();
+        trace(areaPath);
+        ctx.fillStyle = 'rgba(173, 72, 30, .12)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(217, 106, 53, .95)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // The RVs circle the country, then tighten into Arkansas as the camera closes in.
+      const rvFade = 1 - smooth(0.34, 0.5, zoom);
+      if (rvFade > 0) {
+        const gather = smooth(0.04, 0.4, zoom);
+        const hubLat = lerp(US_CENTER.lat, STATE_CENTER.lat, gather);
+        const hubLng = lerp(US_CENTER.lng, STATE_CENTER.lng, gather);
+        const reach = lerp(1, 0.14, gather);
+        const size = (W < 560 ? 22 : 32) / 26;
+        const positionAt = (rv, angle) => {
+          const lat = hubLat + Math.sin(angle) * rv.orbit * reach * 13;
+          return project(lat, hubLng + Math.cos(angle) * rv.orbit * reach * 30);
+        };
+        RVS.forEach(rv => {
+          const angle = rv.start + (now / 1000) * rv.speed + zoom * 5;
+          const at = positionAt(rv, angle);
+          if (at.depth <= 0.02) return;
+          const ahead = positionAt(rv, angle + 0.02);
+          const dx = ahead.x - at.x;
+          const dy = ahead.y - at.y;
+          const scale = size * (0.65 + 0.35 * at.depth);
+          ctx.save();
+          ctx.globalAlpha = rvFade * smooth(0.02, 0.18, at.depth);
+          ctx.translate(at.x, at.y);
+          // Mirror instead of flipping over, so an RV heading west stays upright.
+          if (dx < 0) { ctx.scale(-scale, scale); ctx.rotate(Math.atan2(dy, -dx)); }
+          else { ctx.scale(scale, scale); ctx.rotate(Math.atan2(dy, dx)); }
+          drawRv(ctx);
+          ctx.restore();
+        });
       }
 
       const pinAlpha = smooth(0.84, 0.98, zoom);
       if (pinAlpha > 0) {
+        const fontPx = W < 560 ? 12 : 14;
+        const rowGap = fontPx + 7;
         const pinScale = W < 560 ? 0.55 : 0.8;
-        const placed = MAP_PINS.map(t => project(t.lat, t.lng));
+        const hub = project(34.7465, -92.2896);
+        const placed = SERVICE_TOWNS.map(t => ({ ...t, ...project(t.lat, t.lng) }));
+        const leftX = hub.x - Math.max(30, cam.R * 0.0066);
+        const rightX = hub.x + Math.max(62, cam.R * 0.0112);
 
         ctx.globalAlpha = pinAlpha;
-        placed.sort((a, b) => a.y - b.y).forEach(t => {
+        ctx.font = `600 ${fontPx}px Inter, system-ui, sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.lineJoin = 'round';
+
+        [placed.filter(t => LEFT_LABELS.has(t.label)), placed.filter(t => !LEFT_LABELS.has(t.label))].forEach((group, side) => {
+          group.sort((a, b) => a.y - b.y);
+          const midY = group.reduce((sum, t) => sum + t.y, 0) / group.length;
+          group.forEach((t, i) => {
+            const labelY = midY + (i - (group.length - 1) / 2) * rowGap;
+            const labelX = side ? rightX : leftX;
+            ctx.strokeStyle = 'rgba(241, 231, 209, .5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(t.x, t.y + PIN_HEAD_Y * pinScale);
+            ctx.lineTo(labelX + (side ? -5 : 5), labelY);
+            ctx.stroke();
+
+            ctx.textAlign = side ? 'left' : 'right';
+            ctx.strokeStyle = '#1f1610';
+            ctx.lineWidth = 4;
+            ctx.strokeText(t.label, labelX, labelY);
+            ctx.fillStyle = '#f1e7d1';
+            ctx.fillText(t.label, labelX, labelY);
+          });
+        });
+
+        [...placed].sort((a, b) => a.y - b.y).forEach(t => {
           ctx.save();
           ctx.translate(t.x, t.y);
           ctx.scale(pinScale, pinScale);
@@ -301,25 +293,18 @@ export default function ScrollGlobe() {
 
     function draw(p, now) {
       if (!W || !H) return;
-      const turn = smooth(0, 0.42, p); // done before the map fades in, so the state is already centered
+      const turn = smooth(0, 0.6, p);
       const zoom = smooth(0.12, 0.86, p);
       const idle = (1 - smooth(0, 0.12, p)) * Math.sin(now / 9000) * 0.28;
-      if (mapAllowed && !mapRequested && (isStatic || p > MAP_LOAD_AT)) requestGoogleMap();
-      const mapOn = mapAllowed && mapReady;
-      const mapFade = mapOn ? smooth(0.38, 0.55, zoom) : 0;
       const cam = {
         phi: lerp(phiStart + idle, phiEnd, turn),
         theta: lerp(thetaStart, thetaEnd, turn),
         R: startR * (finalR / startR) ** zoom,
         y: lerp(startY, finalY, zoom),
-        mapFade,
-        // The glow waits for the map; if no map is coming, it arrives on the same timing without one.
-        stateGlow: mapOn ? mapFade : mapAllowed ? 0 : smooth(0.38, 0.55, zoom),
       };
-      styleGoogleMap(cam, zoom, cam.mapFade);
 
       if (globe) {
-        const globeAlpha = 1 - smooth(0.4, 0.58, zoom);
+        const globeAlpha = 1 - smooth(0.52, 0.72, zoom);
         glCanvas.style.opacity = globeAlpha;
         if (globeAlpha > 0) {
           const scale = cam.R / (GLOBE_RADIUS * H / 2);
@@ -348,7 +333,7 @@ export default function ScrollGlobe() {
       const target = clamp01(-rect.top / scrubable);
       dampedP += (target - dampedP) * 0.14;
       if (Math.abs(target - dampedP) < 0.0004) dampedP = target;
-      // The beacon keeps pulsing and the globe drifting until they're gone; past that, draw only when the camera moved.
+      // The RVs keep driving until they fade out; past that, draw only when the camera moved.
       if (!dirty && dampedP === shownP && dampedP > 0.55) return;
       dirty = false;
       shownP = dampedP;
@@ -360,34 +345,15 @@ export default function ScrollGlobe() {
       draw(1, 0);
     }
 
-    function redraw() {
-      if (isStatic) redrawStatic(); else dirty = true;
-    }
-
-    const stopConsentWatch = onConsentChange(choice => {
-      mapAllowed = choice === 'all';
-      redraw();
-    });
-    const stopAuthWatch = onMapsAuthFailure(() => {
-      mapAllowed = false;
-      redraw();
-    });
-
-    function cleanupGoogleMap() {
-      stopConsentWatch();
-      stopAuthWatch();
-      googleHost.replaceChildren();
-    }
-
     fetch('/assets/data/arkansas.geojson')
       .then(r => r.json())
       .then(({ geometry }) => {
         if (!alive) return;
         const ring = geometry.coordinates[0];
         statePath = ring.map(([lng, lat]) => ({ lat, lng }));
-        redraw();
+        if (isStatic) redrawStatic(); else dirty = true;
       })
-      .catch(() => {}); // the town pins still draw without the state outline
+      .catch(() => {}); // the service area still draws without the state outline
 
     if (isStatic) {
       window.addEventListener('resize', redrawStatic, { passive: true });
@@ -396,7 +362,6 @@ export default function ScrollGlobe() {
         alive = false;
         window.removeEventListener('resize', redrawStatic);
         root.classList.remove('scroll-anim--static');
-        cleanupGoogleMap();
       };
     }
 
@@ -432,7 +397,6 @@ export default function ScrollGlobe() {
       globe.destroy();
       glCanvas.getContext('webgl2')?.getExtension('WEBGL_lose_context')?.loseContext();
       globeHost.replaceChildren();
-      cleanupGoogleMap();
     };
   }, []);
 
@@ -440,10 +404,9 @@ export default function ScrollGlobe() {
     <section className="scroll-anim" ref={rootRef} aria-label="Our service area in central Arkansas">
       <div className="scroll-anim-runway" ref={runwayRef}>
         <div className="scroll-anim-sticky">
-          <div className="scroll-globe-scene" ref={sceneRef}>
-            <div className="scroll-globe-gl" ref={globeRef} aria-hidden="true" />
-            <div ref={googleRef} />
-            <canvas className="scroll-globe-map" ref={mapRef} aria-hidden="true" />
+          <div className="scroll-globe-scene" ref={sceneRef} aria-hidden="true">
+            <div className="scroll-globe-gl" ref={globeRef} />
+            <canvas className="scroll-globe-map" ref={mapRef} />
           </div>
 
           <div className="scroll-anim-stage" ref={stageRef}>
@@ -461,7 +424,7 @@ export default function ScrollGlobe() {
           </div>
 
           <div className="scroll-globe-caption" ref={captionRef}>
-            <p>Around central Arkansas, we can be there same-day or next-day on most calls. Somewhere else? Call anyway. Travel fees may apply.</p>
+            <p>Inside the line, we can be there same-day or next-day on most calls. Outside it? Call anyway. Travel fees may apply.</p>
             <Link to="/coverage">See the service area</Link>
           </div>
 

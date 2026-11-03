@@ -52,8 +52,8 @@ export default function Privacy() {
         <h2>Cookies &amp; similar technologies</h2>
         <p>
           We use your browser's local storage to remember your cookie choice. We do not use
-          advertising or tracking cookies. With your permission, our Home and Coverage pages load
-          a map from Google Maps, which may set its own cookies under
+          advertising or tracking cookies. With your permission, our Coverage page loads an
+          interactive map from Google Maps, which may set its own cookies under
           {' '}<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy</a>.
           If you choose "Essential only," the map is not loaded.
         </p>
